@@ -14,7 +14,7 @@ export function SiteHeader() {
 
   return (
     <motion.header
-      className={home ? "absolute inset-x-0 top-0 z-30 border-b border-white/10 bg-[#16081f]/40 text-white backdrop-blur-md" : "border-b border-line"}
+      className={home ? "absolute inset-x-0 top-0 z-30 border-b border-white/10 bg-[#06102e]/40 text-white backdrop-blur-md" : "border-b border-line"}
       initial={reduced ? false : { opacity: 0, y: -16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: reduced ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] }}

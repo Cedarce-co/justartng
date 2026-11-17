@@ -4,7 +4,8 @@ import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import { Cinzel, Great_Vibes } from "next/font/google";
-import { Breathe, Pill } from "@/components/home/motion";
+import { HeroLines } from "@/components/home/Blueprint";
+import { Breathe } from "@/components/home/motion";
 import { InteractiveImage } from "@/components/InteractiveImage";
 
 const script = Great_Vibes({ subsets: ["latin"], weight: "400", display: "swap" });
@@ -55,7 +56,7 @@ function Detail({ icon, href, children }: { icon: ReactNode; href?: string | nul
       <span className="mt-0.5 shrink-0 text-[#7dd3fc]" aria-hidden="true">
         {icon}
       </span>
-      <span className="text-[15px] leading-snug text-white/85 [text-shadow:0_1px_10px_rgba(18,6,32,0.9)] sm:text-base">{children}</span>
+      <span className="text-[15px] leading-snug text-white/85 [text-shadow:0_1px_10px_rgba(4,12,40,0.9)] sm:text-base">{children}</span>
     </>
   );
   const className = "flex items-start gap-3 text-left";
@@ -78,14 +79,15 @@ export function HeroInvitation({ details, registerUrl }: { details: HeroDetails;
   });
 
   return (
-    <section className="relative isolate flex flex-col overflow-hidden bg-[linear-gradient(180deg,#120620_0%,#1d0d33_42%,#3a2a63_78%,#4b3b78_100%)] px-5 pb-12 pt-28 sm:px-10 sm:pt-32 lg:min-h-[100svh]">
+    <section className="relative isolate flex flex-col overflow-hidden bg-[linear-gradient(180deg,#06102e_0%,#0a1f5c_40%,#163c94_74%,#0f2a73_100%)] px-5 pb-20 pt-28 sm:px-10 sm:pb-28 sm:pt-32 lg:min-h-[100svh]">
       {/* Floor: a soft horizon that the artwork sits on */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[45%] bg-[radial-gradient(ellipse_80%_100%_at_50%_100%,rgba(196,181,253,0.2),transparent_75%)]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[45%] bg-[radial-gradient(ellipse_80%_100%_at_50%_100%,rgba(245,184,46,0.16),transparent_75%)]"
         aria-hidden="true"
       />
+      <HeroLines />
 
-      <div className="mx-auto flex w-full max-w-6xl lg:w-[90%] lg:max-w-none flex-1 flex-col items-center text-center">
+      <div className="mx-auto flex w-full max-w-6xl lg:w-[90%] lg:max-w-none flex-1 flex-col items-center justify-center text-center">
         <motion.h1 className="relative z-10 flex flex-col items-center text-white" {...rise(0.05, 28)}>
           <span className={`${script.className} -mb-[0.35em] text-[clamp(2.2rem,5.6vw,3.8rem)] font-normal leading-none text-[#f5d08a]`}>
             Faith
@@ -97,7 +99,7 @@ export function HeroInvitation({ details, registerUrl }: { details: HeroDetails;
 
         <motion.p className={`${roman.className} relative z-10 mt-3 flex items-baseline gap-3 text-[clamp(1.2rem,3vw,2.1rem)] uppercase leading-none tracking-[0.12em] text-white sm:mt-4`} {...rise(0.2)}>
           <span className="font-normal">Exhibition</span>
-          <span className="bg-gradient-to-r from-[#f97316] via-[#facc15] to-[#38bdf8] bg-clip-text font-semibold text-transparent">
+          <span className="text-hues font-semibold">
             {details.edition}
           </span>
         </motion.p>
@@ -131,7 +133,7 @@ export function HeroInvitation({ details, registerUrl }: { details: HeroDetails;
           </div>
         </motion.div>
 
-        <div className="relative z-0 -mt-8 flex w-full flex-1 flex-col items-center justify-start sm:-mt-14 lg:-mt-6">
+        <div className="relative z-0 -mt-3 flex w-full flex-col items-center justify-start sm:-mt-8 lg:mt-0">
           <div
             className="pointer-events-none absolute bottom-[18%] left-1/2 h-[60%] w-[min(90%,48rem)] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(249,115,22,0.28),rgba(56,189,248,0.16)_55%,transparent)] blur-2xl"
             aria-hidden="true"
@@ -165,12 +167,18 @@ export function HeroInvitation({ details, registerUrl }: { details: HeroDetails;
           </motion.div>
         </div>
 
-        <motion.div className="mt-4 flex flex-col items-center gap-6" {...rise(0.8, 16)}>
-          <Pill href={registerUrl} external>
-            Register
-          </Pill>
-          <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm font-semibold uppercase tracking-[0.2em] text-white/90">
-            {details.credit}
+        <motion.div className="-mt-4 flex flex-col items-center gap-6 sm:-mt-6 lg:-mt-10" {...rise(0.8, 16)}>
+          <p className="flex flex-col items-center justify-center gap-x-3 gap-y-1.5 text-sm font-semibold uppercase tracking-[0.08em] text-white/90 sm:flex-row sm:flex-wrap sm:text-lg sm:tracking-[0.18em] lg:text-2xl">
+            {details.credit.split("|").map((part, i) => (
+              <span key={i} className="flex items-center gap-x-3">
+                {i > 0 && (
+                  <span className="hidden sm:inline" aria-hidden="true">
+                    |
+                  </span>
+                )}
+                {part.trim()}
+              </span>
+            ))}
           </p>
         </motion.div>
       </div>

@@ -42,6 +42,24 @@ h4 {
   outline-offset: 2px;
 }
 
+/* The "2.0" colours from the Hues That Heal logo: orange, gold, sky blue. */
+.text-hues {
+  background-image: linear-gradient(90deg, #f97316, #facc15 50%, #38bdf8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Partner logos glide right to left; the track holds two identical loops. */
+@keyframes partners-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

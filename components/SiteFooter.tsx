@@ -12,7 +12,7 @@ export function SiteFooter() {
   const email = publicText(site.email);
   return (
     <motion.footer
-      className={home ? "mt-auto border-t border-white/15 bg-[#12061c]/80 text-white/60 backdrop-blur-xl" : "mt-auto border-t border-line"}
+      className={home ? "mt-auto border-t border-white/15 bg-[#06102e]/80 text-white/60 backdrop-blur-xl" : "mt-auto border-t border-line"}
       initial={reduced ? false : { opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.6 }}

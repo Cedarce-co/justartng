@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { useCallback, useState } from "react";
+import { ArtistLines } from "@/components/home/Blueprint";
 import { StoryModal } from "@/components/home/StoryModal";
 import { InteractiveImage } from "@/components/InteractiveImage";
 
@@ -68,17 +69,18 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
   return (
     <section
       id="artist"
-      className="relative isolate overflow-hidden bg-[linear-gradient(180deg,#241645_0%,#120a26_35%,#0b0618_100%)] text-white lg:min-h-[100svh]"
+      className="relative isolate overflow-hidden bg-[linear-gradient(180deg,#0f2a73_0%,#0a1f5c_35%,#06102e_100%)] text-white lg:min-h-[100svh]"
     >
       {/* Glow behind the portrait */}
       <motion.div
-        className="pointer-events-none absolute -z-10 aspect-square w-[42rem] rounded-full bg-[radial-gradient(closest-side,rgba(109,74,255,0.55),rgba(76,29,149,0.25)_55%,transparent)] blur-2xl max-lg:left-1/2 max-lg:top-[46%] max-lg:w-[34rem] max-lg:-translate-x-1/2 lg:right-[-6rem] lg:top-[12%]"
+        className="pointer-events-none absolute -z-10 aspect-square w-[42rem] rounded-full bg-[radial-gradient(closest-side,rgba(47,123,240,0.55),rgba(23,72,196,0.25)_55%,transparent)] blur-2xl max-lg:left-1/2 max-lg:top-[46%] max-lg:w-[34rem] max-lg:-translate-x-1/2 lg:right-[-6rem] lg:top-[12%]"
         aria-hidden="true"
         animate={reduced ? undefined : { scale: [1, 1.12, 1], opacity: [0.75, 1, 0.75] }}
         transition={reduced ? undefined : { duration: 7, repeat: Infinity, ease: "easeInOut" }}
       />
+      <ArtistLines />
 
-      <div className="mx-auto grid w-full max-w-6xl px-5 pt-20 sm:px-8 lg:min-h-[100svh] lg:grid-cols-[1.05fr_0.95fr] lg:pt-0">
+      <div className="mx-auto grid w-full max-w-6xl px-5 pt-24 sm:px-8 sm:pt-28 lg:min-h-[100svh] lg:grid-cols-[1.05fr_0.95fr] lg:pt-16">
         {/* Text column */}
         <motion.div
           className="relative z-10 flex flex-col justify-center lg:pb-36 lg:pt-24"
@@ -89,7 +91,7 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
         >
           <motion.div variants={pop} className="w-fit">
             <motion.div
-              className="grid size-16 place-items-center rounded-2xl border border-white/30 bg-[#5b3fd1] text-white shadow-[0_10px_40px_rgba(91,63,209,0.55)] sm:size-[4.5rem]"
+              className="grid size-16 place-items-center rounded-2xl border border-white/30 bg-[#1748c4] text-white shadow-[0_10px_40px_rgba(23,72,196,0.55)] sm:size-[4.5rem]"
               animate={reduced ? undefined : { y: [0, -6, 0], rotate: [0, -4, 0] }}
               transition={reduced ? undefined : { duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 1 }}
             >
@@ -102,7 +104,7 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
               Meet Olalekan
             </motion.span>
             <motion.span variants={item} className="block">
-              &ldquo;Swanky&rdquo; Isiaka
+              <span className="text-hues">&ldquo;Swanky&rdquo;</span> Isiaka
             </motion.span>
           </h2>
 
@@ -110,7 +112,7 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
             Nigerian visual artist and production designer, painting the living power of faith in mixed media and acrylic.{" "}
             <span className="relative ml-1 inline-block h-4 w-24 translate-y-0.5 overflow-hidden rounded-full border border-white/70 align-middle" aria-hidden="true">
               <motion.span
-                className="absolute inset-y-[3px] left-[3px] rounded-full bg-[#5b3fd1]"
+                className="absolute inset-y-[3px] left-[3px] rounded-full bg-[#f5b82e]"
                 initial={{ width: "10%" }}
                 animate={reduced ? { width: "62%" } : { width: ["10%", "88%", "10%"] }}
                 transition={reduced ? { duration: 0 } : { duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
@@ -161,7 +163,7 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
                         transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut", delay }}
                       />
                     ))}
-                  <span className="relative grid size-8 place-items-center rounded-full bg-gradient-to-br from-[#f97316] via-[#a855f7] to-[#38bdf8] text-lg leading-none transition-transform duration-300 group-hover:rotate-90">
+                  <span className="relative grid size-8 place-items-center rounded-full bg-gradient-to-br from-[#f97316] via-[#f5b82e] to-[#38bdf8] text-lg leading-none transition-transform duration-300 group-hover:rotate-90">
                     +
                   </span>
                 </span>
@@ -175,7 +177,7 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
               className="group flex items-center gap-5 rounded-full border border-white/35 bg-white/[0.03] p-2 pr-8 backdrop-blur-sm transition-colors hover:border-white/70 hover:bg-white/[0.07]"
             >
               <motion.span
-                className="grid size-16 shrink-0 place-items-center rounded-full border border-white/40 bg-[#5b3fd1] text-2xl sm:size-20"
+                className="grid size-16 shrink-0 place-items-center rounded-full border border-white/40 bg-[#1748c4] text-2xl sm:size-20"
                 aria-hidden="true"
                 animate={reduced ? undefined : { scale: [1, 1.08, 1] }}
                 transition={reduced ? undefined : { duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
@@ -222,16 +224,16 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
 
       {/* Bottom bar */}
       <motion.div
-        className="relative z-20 mx-auto -mt-16 w-full max-w-6xl px-5 pb-10 sm:px-8 lg:absolute lg:inset-x-0 lg:bottom-10 lg:mt-0 lg:pb-0"
+        className="relative z-20 mx-auto -mt-16 w-full max-w-6xl px-5 pb-16 sm:px-8 lg:absolute lg:inset-x-0 lg:bottom-16 lg:mt-0 lg:pb-0"
         initial={reduced ? false : { opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.6 }}
         transition={{ duration: reduced ? 0 : 0.8, ease, delay: reduced ? 0 : 0.35 }}
       >
-        <div className="flex flex-col items-stretch gap-3 rounded-[2rem] border border-white/30 bg-[#0b0618]/55 p-2 backdrop-blur-md sm:flex-row sm:items-center sm:rounded-full">
+        <div className="flex flex-col items-stretch gap-3 rounded-[2rem] border border-white/30 bg-[#06102e]/55 p-2 backdrop-blur-md sm:flex-row sm:items-center sm:rounded-full">
           <div className="flex items-center gap-3 rounded-full border border-white/30 px-6 py-3 sm:min-w-[16rem]">
             <motion.span
-              className="text-[#8b6cff]"
+              className="text-[#f5b82e]"
               aria-hidden="true"
               animate={reduced ? undefined : { rotate: 360 }}
               transition={reduced ? undefined : { duration: 14, repeat: Infinity, ease: "linear" }}
@@ -257,7 +259,7 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
               </a>
             )}
             <span className="inline-flex min-h-11 items-center gap-2">
-              <span className="size-1.5 rounded-full bg-[#8b6cff]" aria-hidden="true" />
+              <span className="size-1.5 rounded-full bg-[#f5b82e]" aria-hidden="true" />
               Lagos, Nigeria
             </span>
           </div>

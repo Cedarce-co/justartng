@@ -3,9 +3,11 @@
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArtistSection, type ArtistDetails } from "@/components/home/ArtistSection";
-import { EventReel } from "@/components/home/EventReel";
+import { StudioLines } from "@/components/home/Blueprint";
 import { HeroInvitation, type HeroDetails } from "@/components/home/HeroInvitation";
-import { Breathe, Pill, Reveal, Words } from "@/components/home/motion";
+import { PartnersSection } from "@/components/home/PartnersSection";
+import { RegistrationSection } from "@/components/home/RegistrationSection";
+import { Breathe, Pill, Words } from "@/components/home/motion";
 
 const REGISTER_URL = "https://docs.google.com/forms/d/e/1FAIpQLScJrtDPSeN8l8QRCyX8wmvbngY8xdzHA-HAkkO5bKeULOs5SA/viewform";
 
@@ -13,6 +15,7 @@ const ease = [0.22, 1, 0.36, 1] as const;
 
 export type HomeEvent = {
   title: string;
+  startsAt: string | null;
   when: string;
   venue: string | null;
   address: string | null;
@@ -35,67 +38,14 @@ export function HomeExperience({
   const bodies = new Intl.ListFormat("en", { style: "long", type: "conjunction" }).format(studio.bodies);
 
   return (
-    <div className="bg-[#14071c] text-[#f7f2fb]">
+    <div className="bg-[#06102e] text-[#f3f7ff]">
       <HeroInvitation details={hero} registerUrl={REGISTER_URL} />
 
       <ArtistSection artist={artist} />
 
-      {event && (
-        <section id="gathering" className="relative scroll-mt-24 overflow-hidden border-t border-white/10 bg-[#1b0a2a] px-5 py-16 sm:px-10 sm:py-24 lg:flex lg:min-h-[100svh] lg:items-center lg:py-16">
-          <div className="pointer-events-none absolute -right-16 top-0 size-72 rounded-full bg-[#a855f7]/25 blur-3xl" aria-hidden="true" />
-          <div className="relative mx-auto grid w-full max-w-6xl items-center gap-8 rounded-[2rem] border border-white/15 bg-white/[0.06] p-5 shadow-[0_24px_80px_rgba(88,28,135,0.28)] backdrop-blur-xl sm:p-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-stretch lg:gap-x-16 lg:p-12">
-            <Reveal className="lg:col-start-1 lg:row-start-1" delay={0.08}>
-              <Breathe scale={1.015} duration={8}>
-                <EventReel />
-              </Breathe>
-            </Reveal>
-            <div className="flex flex-col justify-between gap-10 lg:col-start-2 lg:row-start-1 lg:py-4">
-            <Reveal>
-              <Breathe className="origin-left" scale={1.02} duration={5.8}>
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#f0abfc]">The day</p>
-                <Words as="h2" text="Register a place if you are coming." className="font-display mt-3 max-w-xl text-4xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-5xl" />
-              </Breathe>
-            </Reveal>
-            <Reveal delay={0.14}>
-              <div className="grid gap-4 border-t border-white/15 pt-6 sm:grid-cols-2">
-                <Breathe scale={1.025} duration={5.5}>
-                  <div className="rounded-2xl border border-white/15 bg-white/[0.06] p-4 backdrop-blur-md">
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#f0abfc]/80">When</p>
-                    <p className="mt-2 text-lg">{event.when}</p>
-                  </div>
-                </Breathe>
-                <Breathe scale={1.025} duration={6.1} delay={0.6}>
-                <div className="rounded-2xl border border-white/15 bg-white/[0.06] p-4 backdrop-blur-md">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#f0abfc]/80">Where</p>
-                  <p className="mt-2 text-lg">{event.venue ?? "Venue to be announced"}</p>
-                  {event.address && <p className="mt-1 text-white/65">{event.address}</p>}
-                </div>
-                </Breathe>
-              </div>
-              <div className="mt-8 flex flex-wrap items-center gap-4">
-                <Breathe scale={1.045} duration={3.8} delay={0.3}>
-                  <Pill href={REGISTER_URL} external>
-                    Register
-                  </Pill>
-                </Breathe>
-                {event.map && (
-                  <motion.a
-                    href={event.map}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex min-h-12 items-center text-sm font-semibold uppercase tracking-[0.16em] text-white/70 hover:text-white"
-                    whileHover={reduced ? undefined : { x: 4 }}
-                    whileTap={reduced ? undefined : { scale: 0.97 }}
-                  >
-                    Map
-                  </motion.a>
-                )}
-              </div>
-            </Reveal>
-            </div>
-          </div>
-        </section>
-      )}
+      <PartnersSection />
+
+      {event && <RegistrationSection event={event} registerUrl={REGISTER_URL} />}
 
       <section className="relative isolate min-h-[92svh] overflow-hidden border-t border-white/10">
         <motion.div
@@ -105,13 +55,14 @@ export function HomeExperience({
           animate={reduced ? undefined : { scale: [1, 1.08, 1], x: ["-1.5%", "1.5%", "-1.5%"] }}
           transition={reduced ? undefined : { duration: 28, repeat: Infinity, ease: "easeInOut" }}
         >
-          <Image src="/imgbg/meta3d.jpg" alt="" fill sizes="100vw" className="object-cover object-[68%_center]" />
+          <Image src="/imgbg/meta3d.jpg" alt="" fill sizes="100vw" className="object-cover object-[68%_center] [filter:hue-rotate(-55deg)_saturate(0.85)]" />
         </motion.div>
-        <div className="absolute inset-0 bg-[#120818]/30" aria-hidden="true" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#120818]/75 via-transparent to-[#120818]/35" aria-hidden="true" />
-        <div className="relative mx-auto flex min-h-[92svh] max-w-3xl flex-col items-center justify-center px-6 py-28 text-center">
+        <div className="absolute inset-0 bg-[#06102e]/30" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#06102e]/75 via-transparent to-[#06102e]/35" aria-hidden="true" />
+        <StudioLines />
+        <div className="relative mx-auto flex min-h-[92svh] max-w-3xl flex-col items-center justify-center px-6 py-32 text-center sm:py-40">
           <motion.p
-            className="text-xs font-semibold uppercase tracking-[0.42em] text-[#f3c9ff]"
+            className="text-xs font-semibold uppercase tracking-[0.42em] text-[#f5d08a]"
             initial={reduced ? false : { opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.6 }}
@@ -139,7 +90,7 @@ export function HomeExperience({
                   show: { opacity: 1, y: 0, transition: { duration: reduced ? 0 : 0.7, ease } },
                 }}
               >
-                {line}
+                {line === "collection" ? <span className="text-hues">{line}</span> : line}
               </motion.span>
             ))}
           </motion.h2>

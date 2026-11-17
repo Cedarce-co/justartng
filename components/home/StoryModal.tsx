@@ -51,13 +51,13 @@ function NuggetIcon({ icon }: { icon: NuggetData["icon"] }) {
 function Nugget({ nugget, index, reduced, className }: { nugget: NuggetData; index: number; reduced: boolean; className: string }) {
   return (
     <motion.div
-      className={`${className} z-10 items-center gap-2.5 rounded-2xl border border-white/20 bg-[#140b2b]/70 py-2 pl-2 pr-4 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur-md`}
+      className={`${className} z-10 items-center gap-2.5 rounded-2xl border border-white/20 bg-[#0a1f5c]/70 py-2 pl-2 pr-4 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur-md`}
       initial={reduced ? false : { opacity: 0, scale: 0.6, y: 16 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 18, delay: 0.8 + index * 0.15 }}
     >
       <motion.span
-        className="grid size-8 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#f97316] via-[#a855f7] to-[#38bdf8] text-white"
+        className="grid size-8 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#f97316] via-[#f5b82e] to-[#38bdf8] text-white"
         animate={reduced ? undefined : { y: [0, -3, 0] }}
         transition={reduced ? undefined : { duration: 3 + index * 0.6, repeat: Infinity, ease: "easeInOut", delay: 1.5 + index * 0.3 }}
       >
@@ -133,7 +133,7 @@ export function StoryModal({
             type="button"
             aria-label="Close his story"
             tabIndex={-1}
-            className="absolute inset-0 cursor-default bg-[#07030f]/70 backdrop-blur-md"
+            className="absolute inset-0 cursor-default bg-[#030a1f]/70 backdrop-blur-md"
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -145,7 +145,7 @@ export function StoryModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby="story-title"
-            className="relative flex max-h-[92svh] w-full max-w-6xl flex-col overflow-hidden rounded-t-[2rem] border border-white/15 bg-[linear-gradient(160deg,#241645_0%,#140b2b_45%,#0b0618_100%)] text-white shadow-[0_40px_120px_rgba(10,4,30,0.8)] sm:rounded-[2rem]"
+            className="relative flex max-h-[92svh] w-full max-w-6xl flex-col overflow-hidden rounded-t-[2rem] border border-white/15 bg-[linear-gradient(160deg,#0f2a73_0%,#0a1f5c_45%,#06102e_100%)] text-white shadow-[0_40px_120px_rgba(3,10,31,0.8)] sm:rounded-[2rem]"
             initial={reduced ? { opacity: 0 } : { y: "100%", opacity: 0.6 }}
             animate={{ y: 0, opacity: 1 }}
             exit={reduced ? { opacity: 0 } : { y: "100%", opacity: 0 }}
@@ -154,7 +154,7 @@ export function StoryModal({
             {/* Colour wash echoing the Hues That Heal palette */}
             <div className="pointer-events-none absolute -left-24 -top-24 size-72 rounded-full bg-[#f97316]/25 blur-3xl" aria-hidden="true" />
             <div className="pointer-events-none absolute -bottom-28 right-10 size-80 rounded-full bg-[#38bdf8]/20 blur-3xl" aria-hidden="true" />
-            <div className="pointer-events-none absolute right-1/3 top-10 size-64 rounded-full bg-[#7c3aed]/30 blur-3xl" aria-hidden="true" />
+            <div className="pointer-events-none absolute right-1/3 top-10 size-64 rounded-full bg-[#2f7bf0]/30 blur-3xl" aria-hidden="true" />
 
             {/* Grab handle on phones */}
             <div className="relative mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-white/25 sm:hidden" aria-hidden="true" />
@@ -164,7 +164,7 @@ export function StoryModal({
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="absolute right-4 top-4 z-20 grid size-11 place-items-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-md transition-colors hover:border-white hover:bg-white hover:text-[#140b2b] sm:right-5 sm:top-5"
+              className="absolute right-4 top-4 z-20 grid size-11 place-items-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-md transition-colors hover:border-white hover:bg-white hover:text-[#0a1f5c] sm:right-5 sm:top-5"
               initial={reduced ? false : { opacity: 0, rotate: -90, scale: 0.6 }}
               animate={{ opacity: 1, rotate: 0, scale: 1 }}
               transition={{ duration: reduced ? 0 : 0.45, delay: reduced ? 0 : 0.25, ease }}

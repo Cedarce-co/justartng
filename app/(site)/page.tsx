@@ -48,6 +48,7 @@ export default function HomePage() {
         next
           ? {
               title: next.title,
+              startsAt: hasStart ? next.startsAt : null,
               when: formatWhen(next),
               venue: publicText(next.venue),
               address: publicText(next.address),
