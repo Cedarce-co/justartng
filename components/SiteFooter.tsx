@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { site } from "@/lib/content";
 import { publicText } from "@/lib/format";
@@ -18,10 +19,9 @@ export function SiteFooter() {
       transition={{ duration: reduced ? 0 : 0.6, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className={`mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-6 text-sm sm:px-8 ${home ? "" : "text-muted"}`}>
-        <p>
-          <span className="font-display font-semibold uppercase tracking-[-0.05em] text-current">JUST ART</span>
-          <span className="mx-2">·</span>
-          Paintings by {site.artist}.
+        <p className="flex items-center gap-3">
+          <Image src="/imgbg/heusnobg.png" alt="Hues That Heal" width={707} height={353} className="h-10 w-auto" />
+          <span>Paintings by {site.artist}.</span>
         </p>
         {email ? (
           <a className="underline-offset-4 hover:underline" href={`mailto:${email}`}>

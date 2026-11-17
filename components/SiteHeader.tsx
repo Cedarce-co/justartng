@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -18,15 +19,16 @@ export function SiteHeader() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: reduced ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4 sm:px-8">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-2.5 sm:px-8">
         <MotionLink
           href="/"
-          className="font-display inline-flex min-h-11 items-center text-xl font-semibold lowercase tracking-[-0.06em]"
+          className="inline-flex min-h-11 items-center"
+          aria-label="Hues That Heal, home"
           whileHover={reduced ? undefined : { scale: 1.04 }}
           whileTap={reduced ? undefined : { scale: 0.96 }}
           transition={{ type: "spring", stiffness: 420, damping: 22 }}
         >
-          just art
+          <Image src="/imgbg/heusnobg.png" alt="" width={707} height={353} priority className="h-11 w-auto sm:h-12" />
         </MotionLink>
         <nav aria-label="Primary" className="flex flex-wrap items-center">
           {links.map((link) => (

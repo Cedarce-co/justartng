@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { workMeta, worksByBody } from "@/lib/content";
+import { InteractiveImage } from "@/components/InteractiveImage";
 
 export const metadata: Metadata = {
   title: "Collection of works",
@@ -32,14 +33,16 @@ export default async function WorksPage({ searchParams }: { searchParams: Promis
               return (
                 <li key={work.slug}>
                   <Link href={`/works/${work.slug}`} className="group block">
-                    <Image
-                      src={work.image}
-                      alt={work.alt}
-                      width={work.imageWidth}
-                      height={work.imageHeight}
-                      sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
-                      className="h-auto w-full bg-paper"
-                    />
+                    <InteractiveImage pop={1.12} tilt={10}>
+                      <Image
+                        src={work.image}
+                        alt={work.alt}
+                        width={work.imageWidth}
+                        height={work.imageHeight}
+                        sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
+                        className="h-auto w-full bg-paper"
+                      />
+                    </InteractiveImage>
                     <h3 className="mt-3 text-xl group-hover:text-accent">{work.title}</h3>
                     {meta && <p className="mt-1 text-sm text-muted">{meta}</p>}
                   </Link>

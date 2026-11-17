@@ -22,13 +22,14 @@ const serif = Newsreader({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: site.exhibition,
-    template: `%s · ${site.exhibition}`,
+    default: `${site.brand} | ${site.tagline}`,
+    template: `%s · ${site.brand}`,
   },
-  description: site.intro,
+  description: site.description,
+  applicationName: site.brand,
   openGraph: {
-    title: site.exhibition,
-    description: site.intro,
+    title: `${site.brand} | ${site.tagline}`,
+    description: site.description,
     images: ["/art/the-lost-sheep.webp"],
   },
 };

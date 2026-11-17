@@ -41,9 +41,13 @@ export type SocialLink = { label: string; url: string };
 export type SiteContent = {
   artist: string;
   exhibition: string;
+  brand: string;
+  tagline: string;
+  description: string;
   intro: string;
   bio: string;
   statement: string;
+  artistWord: string;
   email: string;
   socials: SocialLink[];
 };

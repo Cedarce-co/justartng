@@ -1,9 +1,18 @@
 {
   "artist": "Olalekan Isiaka",
   "exhibition": "Anticipate Hues that Heal 2.0",
+  "brand": "Hues That Heal",
+  "tagline": "Faith Art Exhibition 2.0",
+  "description": "A faith-based art exhibition by Olalekan “Swanky” Isiaka, with featured artists Melody Osagie and Omotosho John. Saturday 28 November 2026, Victoria Island, Lagos.",
   "intro": "A faith-based exhibition of paintings by Olalekan Isiaka. The visual studio is built to the scale of the works, so you can walk the room and stand in front of each painting.",
-  "bio": "TODO: artist biography to be supplied.",
+  "bio": "Olalekan Isiaka, popularly known as Swanky, is a Nigerian visual artist and accomplished production designer whose creative practice is deeply rooted in his passion for art, storytelling, and faith. Trained in Painting, Swanky works primarily with mixed media and acrylic on canvas, creating vibrant, expressive works that explore the intersection of faith, human experience, healing, and creative renewal.\n\nHis paintings celebrate the living power of faith, drawing from personal and spiritual journeys to communicate hope, transformation, resilience, and the restorative power of belief.\n\nThrough vibrant colours, expressive forms, and layered visual narratives, his works invite viewers to look beyond aesthetics and connect with the deeper stories of faith and the human experience.",
   "statement": "TODO: exhibition statement to be supplied.",
   "email": "TODO",
-  "socials": []
+  "socials": [
+    {
+      "label": "Instagram",
+      "url": "https://www.instagram.com/lekanswanky/"
+    }
+  ],
+  "artistWord": "Every space I design is rooted in faith, cultural authenticity and immersive storytelling."
 }

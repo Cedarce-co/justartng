@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WorkWriteup } from "@/components/WorkWriteup";
 import { getWork, neighbors, works, workMeta } from "@/lib/content";
+import { InteractiveImage } from "@/components/InteractiveImage";
 
 export function generateStaticParams() {
   return works.map((work) => ({ slug: work.slug }));
@@ -36,15 +37,17 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
 
   return (
     <article className="mx-auto grid max-w-6xl gap-10 px-5 py-12 sm:px-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:py-16">
-      <Image
-        src={work.image}
-        alt={work.alt}
-        width={work.imageWidth}
-        height={work.imageHeight}
-        priority
-        sizes="(min-width: 1024px) 56vw, 100vw"
-        className="h-auto w-full bg-paper"
-      />
+      <InteractiveImage pop={1.08} tilt={8} className="self-start">
+        <Image
+          src={work.image}
+          alt={work.alt}
+          width={work.imageWidth}
+          height={work.imageHeight}
+          priority
+          sizes="(min-width: 1024px) 56vw, 100vw"
+          className="h-auto w-full bg-paper"
+        />
+      </InteractiveImage>
       <div>
         <p className="text-sm font-semibold text-accent">{work.body}</p>
         <h1 className="mt-2 text-4xl leading-tight sm:text-5xl">{work.title}</h1>
