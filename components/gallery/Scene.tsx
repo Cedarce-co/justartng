@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useRef, type RefObject } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { bodies, works, type Work } from "@/lib/content";
-import { LABEL_WIDTH, ROOM, hangWork, labelPose } from "@/lib/gallery";
+import type { Room, Wall, Work } from "@/lib/content";
+import { DOOR, LABEL_WIDTH, ROOM, hangWork, labelPose } from "@/lib/gallery";
+
+export type HungWork = Work & { wall: Wall; position: number };
 import { galleryBus } from "@/components/gallery/bus";
 import type { Ambience } from "@/components/gallery/ambience";
 import { Visitor, type Gender, type Pose } from "@/components/gallery/Visitor";
@@ -94,10 +96,48 @@ function WallLabel({ text, width, position, rotation }: { text: string; width: n
   );
 }
 
-function Artwork({ work, index, texture }: { work: Work; index: number; texture: THREE.Texture | null }) {
+/** Text height of a painting's title on the wall, in metres. */
+const TITLE_HEIGHT = 0.085;
+
+/** The painting's title, painted on the wall just above its frame. */
+function FrameTitle({ text, y, index }: { text: string; y: number; index: number }) {
+  const label = useMemo(() => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    if (!context) return null;
+    const px = 96;
+    const font = `italic 500 ${px}px Newsreader, Georgia, serif`;
+    context.font = font;
+    canvas.width = Math.ceil(context.measureText(text).width + px * 0.6);
+    canvas.height = Math.ceil(px * 1.4);
+    context.font = font; // resizing the canvas resets its state
+    context.fillStyle = "#2a2723";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(text, canvas.width / 2, canvas.height / 2);
+    const map = new THREE.CanvasTexture(canvas);
+    map.colorSpace = THREE.SRGBColorSpace;
+    map.anisotropy = 8;
+    const height = TITLE_HEIGHT * 1.4;
+    return { map, width: (height * canvas.width) / canvas.height, height };
+  }, [text]);
+
+  useEffect(() => () => label?.map.dispose(), [label]);
+  if (!label) return null;
+
+  return (
+    <mesh position={[0, y, 0.01]} userData={{ workIndex: index }}>
+      <planeGeometry args={[label.width, label.height]} />
+      <meshBasicMaterial map={label.map} transparent toneMapped={false} />
+    </mesh>
+  );
+}
+
+function Artwork({ work, index, texture }: { work: HungWork; index: number; texture: THREE.Texture | null }) {
   const place = hangWork(work);
   return (
     <group position={[place.x, place.y, place.z]} rotation={[0, place.rotY, 0]} userData={{ workIndex: index }}>
+      <FrameTitle text={work.title} y={work.heightM / 2 + 0.04 + TITLE_HEIGHT * 1.1} index={index} />
       <mesh position={[0, 0, 0.025]} userData={{ workIndex: index }}>
         <boxGeometry args={[work.widthM + 0.08, work.heightM + 0.08, 0.05]} />
         <meshStandardMaterial color="#1d1a17" roughness={0.6} />
@@ -110,22 +150,98 @@ function Artwork({ work, index, texture }: { work: Work; index: number; texture:
   );
 }
 
+/**
+ * The door to the next room, on the front wall. Behind it glows the next room, named on the light.
+ * When `open`, the leaf swings into the room on its hinge.
+ */
+function Door({ next, open, doorRef }: { next: Room; open: boolean; doorRef: RefObject<THREE.Group | null> }) {
+  const leaf = useRef<THREE.Group>(null);
+  const post = 0.09;
+
+  useFrame((_, dt) => {
+    if (!leaf.current) return;
+    const target = open ? -1.75 : 0;
+    const blend = galleryBus.reduced ? 1 : 1 - Math.exp(-5 * dt);
+    leaf.current.rotation.y += (target - leaf.current.rotation.y) * blend;
+  });
+
+  return (
+    // Turned to face into the room from the front wall.
+    <group ref={doorRef} position={[0, 0, DOOR.z - 0.02]} rotation={[0, Math.PI, 0]} userData={{ door: true }}>
+      {/* The next room, glowing through the doorway */}
+      <mesh position={[0, DOOR.h / 2, -0.01]} userData={{ door: true }}>
+        <planeGeometry args={[DOOR.w, DOOR.h]} />
+        <meshBasicMaterial color={next.wallColor} toneMapped={false} />
+      </mesh>
+      <WallLabel text={next.name} width={DOOR.w} position={[0, DOOR.h * 0.62, -0.005]} rotation={[0, 0, 0]} />
+
+      {/* Frame */}
+      {[-1, 1].map((side) => (
+        <mesh key={side} position={[side * (DOOR.w / 2 + post / 2), DOOR.h / 2, 0.03]} userData={{ door: true }}>
+          <boxGeometry args={[post, DOOR.h + post, 0.08]} />
+          <meshStandardMaterial color="#1d1a17" roughness={0.6} />
+        </mesh>
+      ))}
+      <mesh position={[0, DOOR.h + post / 2, 0.03]} userData={{ door: true }}>
+        <boxGeometry args={[DOOR.w + post * 2, post, 0.08]} />
+        <meshStandardMaterial color="#1d1a17" roughness={0.6} />
+      </mesh>
+
+      {/* Leaf, hinged on its left edge */}
+      <group ref={leaf} position={[-DOOR.w / 2, 0, 0.02]}>
+        <mesh position={[DOOR.w / 2, DOOR.h / 2, 0]} userData={{ door: true }}>
+          <boxGeometry args={[DOOR.w, DOOR.h, 0.05]} />
+          <meshStandardMaterial color="#5a3d28" roughness={0.55} />
+        </mesh>
+        {/* Panels and handle */}
+        {[0.3, 0.72].map((height) => (
+          <mesh key={height} position={[DOOR.w / 2, DOOR.h * height, 0.03]} userData={{ door: true }}>
+            <boxGeometry args={[DOOR.w * 0.7, DOOR.h * 0.32, 0.01]} />
+            <meshStandardMaterial color="#4a3120" roughness={0.6} />
+          </mesh>
+        ))}
+        <mesh position={[DOOR.w - 0.14, DOOR.h * 0.47, 0.06]} userData={{ door: true }}>
+          <sphereGeometry args={[0.04, 16, 12]} />
+          <meshStandardMaterial color="#d8b25a" metalness={0.8} roughness={0.25} />
+        </mesh>
+      </group>
+
+      {/* Sign above the door */}
+      <WallLabel text={`To ${next.name}`} width={3} position={[0, DOOR.h + 0.42, 0.01]} rotation={[0, 0, 0]} />
+      <pointLight position={[0, DOOR.h + 0.6, 0.8]} color="#fff1dc" intensity={2.5} distance={4} decay={2} />
+    </group>
+  );
+}
+
+function isDoor(object: THREE.Object3D) {
+  let current: THREE.Object3D | null = object;
+  while (current) {
+    if (current.userData.door) return true;
+    current = current.parent;
+  }
+  return false;
+}
+
 function turnToward(current: number, target: number, dt: number) {
   return current + shortestAngle(current, target) * (1 - Math.exp(-8 * dt));
 }
 
 function Walker({
   art,
+  door,
   floor,
   pose,
   onSelect,
+  onDoor,
   onInterrupt,
   onArrive,
 }: {
   art: RefObject<THREE.Group | null>;
+  door: RefObject<THREE.Group | null>;
   floor: RefObject<THREE.Mesh | null>;
   pose: RefObject<Pose>;
   onSelect: (index: number) => void;
+  onDoor: () => void;
   onInterrupt: () => void;
   onArrive: () => void;
 }) {
@@ -203,8 +319,9 @@ function Walker({
         return;
       }
       if (event.pointerType !== "mouse" || !art.current) return;
-      const hits = cast(event.clientX, event.clientY, [art.current]);
-      element.style.cursor = hits.some((hit) => workIndex(hit.object) != null) ? "pointer" : "grab";
+      const targets = door.current ? [art.current, door.current] : [art.current];
+      const hits = cast(event.clientX, event.clientY, targets);
+      element.style.cursor = hits.some((hit) => workIndex(hit.object) != null || isDoor(hit.object)) ? "pointer" : "grab";
     };
     const onPointerUp = (event: PointerEvent) => {
       const moved = down?.moved ?? 0;
@@ -218,6 +335,10 @@ function Walker({
           onSelect(index);
           return;
         }
+      }
+      if (door.current && cast(event.clientX, event.clientY, [door.current]).length > 0) {
+        onDoor();
+        return;
       }
       if (!floor.current) return;
       const floorHit = cast(event.clientX, event.clientY, [floor.current])[0];
@@ -273,7 +394,7 @@ function Walker({
       element.removeEventListener("dblclick", onDoubleClick);
       element.removeEventListener("wheel", onWheel);
     };
-  }, [art, camera, floor, gl, onSelect]);
+  }, [art, camera, door, floor, gl, onSelect, onDoor]);
 
   useFrame((_, rawDt) => {
     const dt = Math.min(rawDt, 0.05);
@@ -387,13 +508,20 @@ function Walker({
     if (viewing && shot.current) {
       const { focus, span, yaw: face } = shot.current;
       const half = THREE.MathUtils.degToRad(18);
-      const fill = galleryBus.wide ? 0.74 : 0.62;
-      const dist = THREE.MathUtils.clamp(span / (2 * Math.tan(half) * fill), 1.7, 3.3);
+      const aspect = (camera as THREE.PerspectiveCamera).aspect || 1;
+      const halfAcross = Math.tan(half) * aspect;
+      // Desktop: the painting fills most of the height beside the details card.
+      // Phones: it sits in the top half of the screen, clear of the card, and fits the narrow width too.
+      const fill = galleryBus.wide ? 0.74 : 0.34;
+      const fitHeight = span / (2 * Math.tan(half) * fill);
+      const fitWidth = span / (2 * halfAcross * 0.86);
+      const dist = THREE.MathUtils.clamp(Math.max(fitHeight, fitWidth), 1.7, galleryBus.wide ? 3.3 : 7);
       const nx = Math.sin(face);
       const nz = Math.cos(face);
       desired.set(focus.x + nx * dist, focus.y + span * 0.06, focus.z + nz * dist);
       const slide = galleryBus.wide ? dist * 0.2 : 0;
-      const lift = galleryBus.wide ? 0 : span * 0.26;
+      // Aim below the painting so it rises to the upper part of a phone screen.
+      const lift = galleryBus.wide ? 0 : 0.2 * 2 * dist * Math.tan(half);
       look.set(focus.x + Math.cos(face) * slide, focus.y - lift, focus.z - Math.sin(face) * slide);
       targetFov = 36;
     } else {
@@ -420,11 +548,12 @@ function Walker({
   return null;
 }
 
-function Footsteps({ ambience }: { ambience: RefObject<Ambience | null> }) {
+/** Keeps the studio music playing and rings the chime on arrival. There are no footstep sounds. */
+function Soundscape({ ambience }: { ambience: RefObject<Ambience | null> }) {
   useFrame((_, dt) => {
     const sound = ambience.current;
     if (!sound) return;
-    sound.update(dt, galleryBus.moving, galleryBus.pace);
+    sound.update(dt);
     if (galleryBus.chime) {
       galleryBus.chime = false;
       sound.chime();
@@ -434,25 +563,37 @@ function Footsteps({ ambience }: { ambience: RefObject<Ambience | null> }) {
 }
 
 export function Scene({
+  room,
+  works,
   textures,
   gender,
   ambience,
+  nextRoom,
+  doorOpen,
   onSelect,
+  onDoor,
   onInterrupt,
   onArrive,
 }: {
+  room: Room;
+  works: HungWork[];
   textures: Record<string, THREE.Texture | undefined>;
   gender: Gender | null;
   ambience: RefObject<Ambience | null>;
+  /** The room on the other side of the door, if there is one. */
+  nextRoom: Room | null;
+  doorOpen: boolean;
   onSelect: (index: number) => void;
+  onDoor: () => void;
   onInterrupt: () => void;
   onArrive: () => void;
 }) {
   const floorTexture = useFloorTexture();
   const art = useRef<THREE.Group>(null);
+  const door = useRef<THREE.Group>(null);
   const floor = useRef<THREE.Mesh>(null);
   const pose = useRef<Pose>({ x: 1.5, z: 2.2, yaw: 0, moving: false, phase: 0 });
-  const wallUse = new Map<string, number>();
+  const backLabel = labelPose("back");
 
   return (
     <>
@@ -464,7 +605,7 @@ export function Scene({
       ))}
       <mesh position={[0, ROOM.h / 2, 0]}>
         <boxGeometry args={[ROOM.w, ROOM.h, ROOM.d]} />
-        <meshStandardMaterial color="#f4f1ea" side={THREE.BackSide} roughness={1} />
+        <meshStandardMaterial color={room.wallColor} side={THREE.BackSide} roughness={1} />
       </mesh>
       <mesh ref={floor} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>
         <planeGeometry args={[ROOM.w, ROOM.d]} />
@@ -483,21 +624,12 @@ export function Scene({
           <Artwork key={work.slug} work={work} index={index} texture={textures[work.slug] ?? null} />
         ))}
       </group>
-      {bodies().map((body) => {
-        const sample = works.find((work) => work.body === body);
-        if (!sample) return null;
-        const place = hangWork(sample);
-        const count = wallUse.get(place.wall) ?? 0;
-        wallUse.set(place.wall, count + 1);
-        const pose = labelPose(place.wall);
-        const position: [number, number, number] = [...pose.position];
-        if (place.wall === "back") position[0] += count * 1.2;
-        else position[2] += count * 1.2;
-        return <WallLabel key={body} text={body} width={LABEL_WIDTH[place.wall]} position={position} rotation={pose.rotation} />;
-      })}
+      {/* The room's name, painted high on the back wall */}
+      <WallLabel text={room.name} width={LABEL_WIDTH.back} position={backLabel.position} rotation={backLabel.rotation} />
+      {nextRoom && <Door next={nextRoom} open={doorOpen} doorRef={door} />}
       {gender && <Visitor gender={gender} pose={pose} />}
-      <Walker art={art} floor={floor} pose={pose} onSelect={onSelect} onInterrupt={onInterrupt} onArrive={onArrive} />
-      <Footsteps ambience={ambience} />
+      <Walker art={art} door={door} floor={floor} pose={pose} onSelect={onSelect} onDoor={onDoor} onInterrupt={onInterrupt} onArrive={onArrive} />
+      <Soundscape ambience={ambience} />
     </>
   );
 }

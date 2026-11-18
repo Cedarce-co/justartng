@@ -1,34 +1,40 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { workMeta, worksByBody } from "@/lib/content";
+import { roomWorks, rooms, studioHref, workMeta } from "@/lib/content";
 import { InteractiveImage } from "@/components/InteractiveImage";
 
 export const metadata: Metadata = {
   title: "Collection of works",
-  description: "Paintings in Anticipate Hues that Heal 2.0, grouped by body of work.",
+  description: "Paintings by Olalekan Isiaka in two rooms: Faith Alive, the Hues That Heal 2.0 exhibition, and The Portfolio.",
 };
 
 export default async function WorksPage({ searchParams }: { searchParams: Promise<{ notice?: string }> }) {
   const { notice } = await searchParams;
-  const groups = worksByBody();
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
       <h1 className="text-4xl sm:text-5xl">Collection of works</h1>
       <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
-        Six paintings, in three bodies of work. Open one to read it, or walk to it in the visual studio.
+        The paintings hang in two rooms. Open one to read it, or walk to it in the visual studio.
       </p>
       {notice === "webgl" && (
         <p role="status" className="mt-6 max-w-2xl border border-line bg-paper px-4 py-3">
           This browser can&apos;t open the visual studio, so the collection is shown here instead.
         </p>
       )}
-      {groups.map((group) => (
-        <section key={group.body} className="mt-12">
-          <h2 className="text-2xl">{group.body}</h2>
+      {rooms.map((room) => (
+        <section key={room.id} className="mt-12">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+            <h2 className="text-2xl">
+              {room.name} <span className="text-base text-muted">· {room.subtitle}</span>
+            </h2>
+            <Link href={studioHref(room)} className="text-accent underline-offset-4 hover:underline">
+              Walk this room &rarr;
+            </Link>
+          </div>
           <ul className="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {group.works.map((work) => {
+            {roomWorks(room).map((work) => {
               const meta = workMeta(work);
               return (
                 <li key={work.slug}>

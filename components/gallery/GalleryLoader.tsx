@@ -12,6 +12,6 @@ const GalleryApp = dynamic(() => import("@/components/gallery/GalleryApp"), {
   ),
 });
 
-export function GalleryLoader({ initialSlug }: { initialSlug: string | null }) {
-  return <GalleryApp initialSlug={initialSlug} />;
+export function GalleryLoader({ initialSlug, initialRoom }: { initialSlug: string | null; initialRoom: string | null }) {
+  return <GalleryApp initialSlug={initialSlug} initialRoom={initialRoom} />;
 }

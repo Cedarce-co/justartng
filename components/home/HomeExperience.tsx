@@ -3,11 +3,13 @@
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArtistSection, type ArtistDetails } from "@/components/home/ArtistSection";
+import { DragToEnter } from "@/components/home/DragToEnter";
+import { StudioInvite } from "@/components/home/StudioInvite";
 import { StudioLines } from "@/components/home/Blueprint";
 import { HeroInvitation, type HeroDetails } from "@/components/home/HeroInvitation";
 import { PartnersSection } from "@/components/home/PartnersSection";
 import { RegistrationSection } from "@/components/home/RegistrationSection";
-import { Breathe, Pill, Words } from "@/components/home/motion";
+import { Breathe, Words } from "@/components/home/motion";
 
 const REGISTER_URL = "https://docs.google.com/forms/d/e/1FAIpQLScJrtDPSeN8l8QRCyX8wmvbngY8xdzHA-HAkkO5bKeULOs5SA/viewform";
 
@@ -32,14 +34,16 @@ export function HomeExperience({
   hero: HeroDetails;
   artist: ArtistDetails;
   event: HomeEvent | null;
-  studio: { count: number; bodies: string[] };
+  studio: { count: number; room: string; subtitle: string };
 }) {
   const reduced = useReducedMotion();
-  const bodies = new Intl.ListFormat("en", { style: "long", type: "conjunction" }).format(studio.bodies);
+  const roomLine = `${studio.room}: the paintings of ${studio.subtitle}, in 3D.`;
 
   return (
     <div className="bg-[#06102e] text-[#f3f7ff]">
       <HeroInvitation details={hero} registerUrl={REGISTER_URL} />
+
+      <StudioInvite />
 
       <ArtistSection artist={artist} />
 
@@ -47,7 +51,7 @@ export function HomeExperience({
 
       {event && <RegistrationSection event={event} registerUrl={REGISTER_URL} />}
 
-      <section className="relative isolate min-h-[92svh] overflow-hidden border-t border-white/10">
+      <section id="studio" className="relative isolate min-h-[92svh] overflow-hidden border-t border-white/10">
         <motion.div
           className="absolute -inset-[8%]"
           aria-hidden="true"
@@ -68,7 +72,7 @@ export function HomeExperience({
             viewport={{ once: true, amount: 0.6 }}
             transition={{ duration: reduced ? 0 : 0.6, ease }}
           >
-            Visual studio
+            3D Exhibition Studio
           </motion.p>
           <Breathe scale={1.02} duration={6.4}>
           <motion.h2
@@ -113,7 +117,7 @@ export function HomeExperience({
             {/* {studio.count} paintings */}
           </motion.p>
           <Breathe className="mt-3" scale={1.02} duration={6.6} delay={0.4}>
-            <Words text={bodies} className="max-w-lg text-lg leading-relaxed text-white/85 sm:text-xl" />
+            <Words text={roomLine} className="max-w-lg text-lg leading-relaxed text-white/85 sm:text-xl" />
           </Breathe>
           <motion.p
             className="mt-4 max-w-md text-base leading-relaxed text-white/70"
@@ -122,7 +126,7 @@ export function HomeExperience({
             viewport={{ once: true, amount: 0.6 }}
             transition={{ duration: reduced ? 0 : 0.7, delay: reduced ? 0 : 0.45, ease }}
           >
-            The room is built to their scale, so you can stand in front of each one.
+            The art collection is hung in a 3D studio. Choose an avatar, walk the room and stand in front of each painting, at its real size.
           </motion.p>
           <motion.div
             className="mt-10"
@@ -131,9 +135,7 @@ export function HomeExperience({
             viewport={{ once: true, amount: 0.6 }}
             transition={{ duration: reduced ? 0 : 0.7, delay: reduced ? 0 : 0.55, ease }}
           >
-            <Breathe scale={1.045} duration={3.6}>
-              <Pill href="/visual-studio">Enter the visual studio</Pill>
-            </Breathe>
+            <DragToEnter href="/visual-studio" hint="Drag to enter the 3D studio" label="Walk the Hues That Heal 2.0 collection" />
           </motion.div>
         </div>
       </section>

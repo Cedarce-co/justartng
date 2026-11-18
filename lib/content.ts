@@ -1,4 +1,5 @@
 import eventsJson from "@/content/events.json";
+import roomsJson from "@/content/rooms.json";
 import siteJson from "@/content/site.json";
 import worksJson from "@/content/works.json";
 
@@ -11,16 +12,23 @@ export type Work = {
   year: string;
   medium: string;
   size: string;
-  body: string;
   writeup: string;
   image: string;
   alt: string;
   imageWidth: number;
   imageHeight: number;
-  wall: Wall;
-  position: number;
   widthM: number;
   heightM: number;
+};
+
+/** A room in the visual studio. `works` lists slugs in hanging order; a painting can hang in more than one room. */
+export type Room = {
+  id: string;
+  name: string;
+  subtitle: string;
+  welcome: string;
+  wallColor: string;
+  works: string[];
 };
 
 export type GalleryEvent = {
@@ -53,8 +61,34 @@ export type SiteContent = {
 };
 
 export const works = worksJson as Work[];
+export const rooms = roomsJson as Room[];
 export const events = eventsJson as GalleryEvent[];
 export const site = siteJson as SiteContent;
+
+/** The main room: the current exhibition, opened by default. */
+export const mainRoom = rooms[0];
+
+export function getRoom(id: string | null | undefined) {
+  return rooms.find((room) => room.id === id) ?? null;
+}
+
+export function roomWorks(room: Room) {
+  return room.works.map((slug) => getWork(slug)).filter((work): work is Work => work !== null);
+}
+
+/** The rooms a painting hangs in, main room first. */
+export function roomsFor(slug: string) {
+  return rooms.filter((room) => room.works.includes(slug));
+}
+
+/** Link into the studio: a room, optionally walking straight to one painting. */
+export function studioHref(room: Room, slug?: string) {
+  const params = new URLSearchParams();
+  if (room.id !== mainRoom.id) params.set("room", room.id);
+  if (slug) params.set("work", slug);
+  const query = params.toString();
+  return query ? `/visual-studio?${query}` : "/visual-studio";
+}
 
 export function getWork(slug: string) {
   return works.find((work) => work.slug === slug) ?? null;
@@ -71,21 +105,6 @@ export function neighbors(slug: string) {
     previous: works[(index - 1 + works.length) % works.length],
     next: works[(index + 1) % works.length],
   };
-}
-
-export function bodies() {
-  const list: string[] = [];
-  for (const work of works) {
-    if (!list.includes(work.body)) list.push(work.body);
-  }
-  return list;
-}
-
-export function worksByBody() {
-  return bodies().map((body) => ({
-    body,
-    works: works.filter((work) => work.body === body),
-  }));
 }
 
 function eventTime(event: GalleryEvent) {

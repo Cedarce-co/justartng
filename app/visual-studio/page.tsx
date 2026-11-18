@@ -3,14 +3,14 @@ import { GalleryLoader } from "@/components/gallery/GalleryLoader";
 
 export const metadata: Metadata = {
   title: "Visual Studio",
-  description: "Walk the visual studio. Drag to look, and use W A S D to move between the paintings.",
+  description: "Walk the two rooms of the visual studio: Faith Alive, the Hues That Heal 2.0 exhibition, and The Portfolio.",
 };
 
-export default async function VisualStudioPage({ searchParams }: { searchParams: Promise<{ work?: string }> }) {
-  const { work } = await searchParams;
+export default async function VisualStudioPage({ searchParams }: { searchParams: Promise<{ work?: string; room?: string }> }) {
+  const { work, room } = await searchParams;
   return (
     <>
-      <GalleryLoader initialSlug={work ?? null} />
+      <GalleryLoader initialSlug={work ?? null} initialRoom={room ?? null} />
       <noscript>
         <div className="mx-auto max-w-xl px-5 py-16">
           <h1 className="text-4xl">Visual Studio</h1>

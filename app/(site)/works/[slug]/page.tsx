@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WorkWriteup } from "@/components/WorkWriteup";
-import { getWork, neighbors, works, workMeta } from "@/lib/content";
+import { getWork, neighbors, roomsFor, studioHref, works, workMeta } from "@/lib/content";
 import { InteractiveImage } from "@/components/InteractiveImage";
 
 export function generateStaticParams() {
@@ -27,12 +27,14 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
   if (!work) notFound();
   const { previous, next } = neighbors(work.slug);
   const meta = workMeta(work);
+  const workRooms = roomsFor(work.slug);
+  const roomNames = workRooms.map((room) => room.name).join(", ");
   const details = [
     ["Artist", work.artist],
     ["Year", work.year],
     ["Medium", work.medium],
     ["Size", work.size],
-    ["Body of work", work.body],
+    [workRooms.length > 1 ? "Rooms" : "Room", roomNames],
   ].filter(([, value]) => Boolean(value));
 
   return (
@@ -49,7 +51,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
         />
       </InteractiveImage>
       <div>
-        <p className="text-sm font-semibold text-accent">{work.body}</p>
+        <p className="text-sm font-semibold text-accent">{roomNames}</p>
         <h1 className="mt-2 text-4xl leading-tight sm:text-5xl">{work.title}</h1>
         <dl className="mt-6 grid gap-2 text-sm">
           {details.map(([label, value]) => (
@@ -61,7 +63,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
         </dl>
         {meta && <p className="sr-only">{meta}</p>}
         <WorkWriteup text={work.writeup} className="mt-6" />
-        <Link href={`/visual-studio?work=${work.slug}`} className="mt-8 inline-flex min-h-11 items-center rounded-md bg-accent px-4 text-on">
+        <Link href={workRooms[0] ? studioHref(workRooms[0], work.slug) : `/visual-studio?work=${work.slug}`} className="mt-8 inline-flex min-h-11 items-center rounded-md bg-accent px-4 text-on">
           View in the visual studio
         </Link>
         {previous && next && (

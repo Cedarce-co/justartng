@@ -1,0 +1,42 @@
+[
+  {
+    "id": "exhibition",
+    "name": "Faith Alive",
+    "subtitle": "Hues That Heal 2.0",
+    "welcome": "Welcome to Faith Alive, the Hues That Heal 2.0 exhibition. Walk the room and stand with each painting: a journey of love, faith and hope by Olalekan “Swanky” Isiaka.",
+    "wallColor": "#f4f1ea",
+    "works": [
+      "hope",
+      "the-promise",
+      "the-good-fight-of-faith",
+      "multiplier-effect",
+      "faith-alive-the-power-of-a-touch",
+      "open-gates-the-journey",
+      "symphonia",
+      "the-lion-and-the-lamb",
+      "unwavering",
+      "bond",
+      "syrophoenician-woman"
+    ]
+  },
+  {
+    "id": "portfolio",
+    "name": "The Portfolio",
+    "subtitle": "Works 2025–2026",
+    "welcome": "Welcome to The Portfolio, Olalekan “Swanky” Isiaka’s collection of paintings from 2025 and 2026. Take your time with each one.",
+    "wallColor": "#eef1f6",
+    "works": [
+      "the-lion-and-the-lamb",
+      "hope",
+      "the-good-fight-of-faith",
+      "the-promise",
+      "open-gates-the-journey",
+      "faith-alive-the-power-of-a-touch",
+      "lost-sheep",
+      "bond",
+      "call-for-prayer",
+      "unwavering",
+      "syrophoenician-woman"
+    ]
+  }
+]

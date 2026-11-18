@@ -1,5 +1,5 @@
 import { HomeExperience } from "@/components/home/HomeExperience";
-import { bodies, site, splitEvents, works } from "@/lib/content";
+import { mainRoom, site, splitEvents } from "@/lib/content";
 import { formatWhen, publicText, safeHttpUrl } from "@/lib/format";
 
 const heroDate = new Intl.DateTimeFormat("en-GB", {
@@ -43,7 +43,7 @@ export default function HomePage() {
         credit: "Olalekan Isiaka  |  with Melody Osagie + Omotosho John",
       }}
       artist={artistDetails()}
-      studio={{ count: works.length, bodies: bodies() }}
+      studio={{ count: mainRoom.works.length, room: mainRoom.name, subtitle: mainRoom.subtitle }}
       event={
         next
           ? {

@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { useCallback, useState } from "react";
 import { ArtistLines } from "@/components/home/Blueprint";
+import { DragToEnter } from "@/components/home/DragToEnter";
 import { StoryModal } from "@/components/home/StoryModal";
 import { InteractiveImage } from "@/components/InteractiveImage";
 
@@ -172,22 +172,7 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
           </motion.div>
 
           <motion.div variants={slideIn} className="mt-8 max-w-lg">
-            <Link
-              href="/visual-studio"
-              className="group flex items-center gap-5 rounded-full border border-white/35 bg-white/[0.03] p-2 pr-8 backdrop-blur-sm transition-colors hover:border-white/70 hover:bg-white/[0.07]"
-            >
-              <motion.span
-                className="grid size-16 shrink-0 place-items-center rounded-full border border-white/40 bg-[#1748c4] text-2xl sm:size-20"
-                aria-hidden="true"
-                animate={reduced ? undefined : { scale: [1, 1.08, 1] }}
-                transition={reduced ? undefined : { duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <span className="inline-block transition-transform duration-300 group-hover:-rotate-90">&#8600;</span>
-              </motion.span>
-              <span className="text-base leading-snug text-white/90 sm:text-lg">
-                Step into his visual studio and walk the collection.
-              </span>
-            </Link>
+            <DragToEnter href="/visual-studio?room=portfolio" hint="Drag to enter the 3D studio" label="See Lekan’s art collection in 3D" />
           </motion.div>
         </motion.div>
 

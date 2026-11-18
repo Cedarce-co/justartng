@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: `${site.brand} | ${site.tagline}`,
     description: site.description,
-    images: ["/art/the-lost-sheep.webp"],
+    images: ["/art/hope.webp"],
   },
 };
 

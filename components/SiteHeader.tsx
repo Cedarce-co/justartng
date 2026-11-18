@@ -5,7 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const links = [{ href: "/visual-studio", label: "Visual Studio" }];
+// Leads to the 3D studio section at the end of the home page, where visitors drag to enter.
+const links = [{ href: "/#studio", label: "See 3D Exhibition Studio" }];
 const MotionLink = motion.create(Link);
 
 export function SiteHeader() {
