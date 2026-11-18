@@ -13,6 +13,7 @@ export async function sendCollectorAlert(interest: CollectorInterest) {
   const lines = [
     `${interest.fullName} would like to collect “${interest.workTitle}”.`,
     "",
+    `Painting: ${interest.workTitle}`,
     `WhatsApp / phone: ${interest.phone}`,
     `Payment: ${interest.payment}`,
     `Deliver to: ${interest.address}`,

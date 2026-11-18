@@ -3,6 +3,7 @@ import { getWork, roomsFor } from "@/lib/content";
 import { sendCollectorAlert } from "@/lib/email";
 import { InterestStorageError, saveInterest } from "@/lib/interests";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { sendCollectorWhatsApp } from "@/lib/whatsapp";
 import { collectSchema } from "@/lib/validation";
 
 /** The studio guide sends a visitor's interest in collecting a painting here. */
@@ -31,8 +32,9 @@ export async function POST(request: Request) {
       address: parsed.data.address,
       delivery: parsed.data.delivery,
     });
-    const notified = await sendCollectorAlert(interest);
-    return NextResponse.json({ ok: true, notified }, { status: 201 });
+    // Email and WhatsApp alerts go out together; either may be switched off by leaving its settings empty.
+    const [emailed, whatsapped] = await Promise.all([sendCollectorAlert(interest), sendCollectorWhatsApp(interest)]);
+    return NextResponse.json({ ok: true, notified: emailed || whatsapped }, { status: 201 });
   } catch (error) {
     if (error instanceof InterestStorageError) {
       return NextResponse.json({ ok: false, error: error.message }, { status: 503 });
