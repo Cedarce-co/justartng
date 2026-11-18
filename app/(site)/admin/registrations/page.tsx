@@ -4,6 +4,7 @@ import { AdminLogin } from "@/components/AdminLogin";
 import { isAdminCookie } from "@/lib/admin";
 import { HEARD_ABOUT } from "@/lib/validation";
 import { listRegistrations } from "@/lib/db";
+import { listInterests } from "@/lib/interests";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +36,7 @@ export default async function RegistrationsPage() {
     );
   }
 
-  const rows = await listRegistrations();
+  const [rows, interests] = await Promise.all([listRegistrations(), listInterests()]);
   return (
     <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -81,6 +82,49 @@ export default async function RegistrationsPage() {
                   <td className="py-3 pr-4">{row.phone ?? ""}</td>
                   <td className="py-3 pr-4">{row.heardAbout ? heard.get(row.heardAbout as "friend") ?? row.heardAbout : ""}</td>
                   <td className="py-3 pr-4">{row.accessibility ?? ""}</td>
+                  <td className="py-3">{row.createdAt}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Visitors who asked the studio guide to collect a painting */}
+      <div className="mt-16 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2 className="text-3xl">Collector interests</h2>
+          <p className="mt-2 text-muted">{interests.length === 1 ? "1 request" : `${interests.length} requests`} from the 3D studio</p>
+        </div>
+        <a href="/api/admin/interests" className="inline-flex min-h-11 items-center rounded-md border border-line px-4">
+          Download CSV
+        </a>
+      </div>
+      {interests.length === 0 ? (
+        <p className="mt-6 text-muted">No one has asked to collect a painting yet.</p>
+      ) : (
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full min-w-[820px] border-collapse text-left text-sm">
+            <thead>
+              <tr className="border-b border-line text-muted">
+                <th className="py-2 pr-4 font-semibold">Painting</th>
+                <th className="py-2 pr-4 font-semibold">Name</th>
+                <th className="py-2 pr-4 font-semibold">WhatsApp / phone</th>
+                <th className="py-2 pr-4 font-semibold">Payment</th>
+                <th className="py-2 pr-4 font-semibold">Deliver to</th>
+                <th className="py-2 pr-4 font-semibold">When</th>
+                <th className="py-2 font-semibold">Sent</th>
+              </tr>
+            </thead>
+            <tbody>
+              {interests.map((row) => (
+                <tr key={row.id} className="border-b border-line align-top">
+                  <td className="py-3 pr-4">{row.workTitle}</td>
+                  <td className="py-3 pr-4">{row.fullName}</td>
+                  <td className="py-3 pr-4">{row.phone}</td>
+                  <td className="py-3 pr-4">{row.payment}</td>
+                  <td className="py-3 pr-4">{row.address}</td>
+                  <td className="py-3 pr-4">{row.delivery}</td>
                   <td className="py-3">{row.createdAt}</td>
                 </tr>
               ))}

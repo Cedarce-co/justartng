@@ -61,6 +61,11 @@ function pg() {
   return client;
 }
 
+/** The shared Postgres connection, or null when no DATABASE_URL is set. Other stores reuse it. */
+export function sharedConnection() {
+  return pg();
+}
+
 async function database() {
   const db = pg();
   if (!db) return null;

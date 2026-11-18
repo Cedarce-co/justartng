@@ -207,6 +207,7 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
   const [viewed, setViewed] = useState<string[]>([]);
   const [farewell, setFarewell] = useState<string | null>(null);
   const eventDate = useMemo(upcomingDate, []);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
   const panelRef = useRef<HTMLElement>(null);
   const opener = useRef<HTMLElement | null>(null);
   const openedFromLink = useRef(false);
@@ -574,9 +575,11 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
           viewed={viewed}
           active={!offer && tour === null && !passing}
           viewing={Boolean(work)}
+          current={work}
           eventDate={eventDate}
           farewell={farewell}
           onVisit={approach}
+          onFocusChat={closeMenu}
         />
       )}
       <AnimatePresence>
