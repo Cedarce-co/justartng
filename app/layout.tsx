@@ -1,23 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Sans, Newsreader } from "next/font/google";
+import { sans, serif } from "@/app/fonts";
 import { siteUrl } from "@/lib/format";
 import { site } from "@/lib/content";
 import "./globals.css";
-
-const sans = Instrument_Sans({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-sans",
-  weight: ["400", "600"],
-});
-
-const serif = Newsreader({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-serif",
-  style: ["normal", "italic"],
-  weight: ["400", "600"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),

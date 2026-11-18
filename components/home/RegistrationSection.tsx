@@ -3,10 +3,9 @@
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useId, useState } from "react";
-import { Great_Vibes } from "next/font/google";
+import { script } from "@/app/fonts";
 import { Pill } from "@/components/home/motion";
 
-const script = Great_Vibes({ subsets: ["latin"], weight: "400", display: "swap" });
 
 const ease = [0.22, 1, 0.36, 1] as const;
 const FLYER = "/imgbg/huesflyer.jpeg";

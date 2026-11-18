@@ -2,10 +2,9 @@
 
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import { Great_Vibes } from "next/font/google";
+import { script } from "@/app/fonts";
 import { Blueprint, Mark, Ring } from "@/components/home/Blueprint";
 
-const script = Great_Vibes({ subsets: ["latin"], weight: "400", display: "swap" });
 const ease = [0.22, 1, 0.36, 1] as const;
 
 /** The cream of the flyer paper, which every logo image still carries as its background. */

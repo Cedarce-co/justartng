@@ -3,13 +3,11 @@
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
-import { Cinzel, Great_Vibes } from "next/font/google";
+import { roman, script } from "@/app/fonts";
 import { HeroLines } from "@/components/home/Blueprint";
 import { Breathe } from "@/components/home/motion";
 import { InteractiveImage } from "@/components/InteractiveImage";
 
-const script = Great_Vibes({ subsets: ["latin"], weight: "400", display: "swap" });
-const roman = Cinzel({ subsets: ["latin"], weight: ["400", "600"], display: "swap" });
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
