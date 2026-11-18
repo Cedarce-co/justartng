@@ -40,6 +40,8 @@ export function safeHttpUrl(value: string) {
 export function siteUrl() {
   const configured = process.env.NEXT_PUBLIC_SITE_URL;
   if (configured) return configured.replace(/\/$/, "");
+  // Netlify sets URL to the site's main address during its builds.
+  if (process.env.URL) return process.env.URL.replace(/\/$/, "");
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   return "http://localhost:3000";
 }

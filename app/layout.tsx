@@ -12,10 +12,20 @@ export const metadata: Metadata = {
   },
   description: site.description,
   applicationName: site.brand,
+  // Link previews (WhatsApp, Facebook, X, LinkedIn…): image, title, description and address.
   openGraph: {
+    type: "website",
+    url: "/",
+    siteName: site.brand,
     title: `${site.brand} | ${site.tagline}`,
     description: site.description,
-    images: ["/art/hope.webp"],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Hues That Heal: Faith Art Exhibition 2.0" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${site.brand} | ${site.tagline}`,
+    description: site.description,
+    images: ["/og-image.jpg"],
   },
 };
 
