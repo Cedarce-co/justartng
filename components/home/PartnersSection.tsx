@@ -64,7 +64,7 @@ export function PartnersSection() {
     <section
       id="partners"
       aria-labelledby="partners-title"
-      className="relative isolate overflow-hidden bg-[linear-gradient(180deg,#06102e_0%,#0a1f5c_50%,#06102e_100%)] py-24 text-white sm:py-32"
+      className="relative isolate overflow-hidden bg-[linear-gradient(180deg,#040b24_0%,#08143d_50%,#040b24_100%)] py-24 text-white sm:py-32"
     >
       {/* Warm gold glow: a thank-you light behind the band */}
       <motion.div

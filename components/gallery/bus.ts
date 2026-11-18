@@ -17,6 +17,9 @@ export const galleryBus: {
   chime: boolean;
   viewing: boolean;
   wide: boolean;
+  /** Where the visitor stands, so the studio companion can comment on what's nearby. */
+  x: number;
+  z: number;
 } = {
   glideTo: null,
   reduced: false,
@@ -25,4 +28,6 @@ export const galleryBus: {
   chime: false,
   viewing: false,
   wide: true,
+  x: 1.5,
+  z: 2.2,
 };

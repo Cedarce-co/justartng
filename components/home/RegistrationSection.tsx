@@ -246,10 +246,10 @@ export function RegistrationSection({ event, registerUrl }: { event: Registratio
   return (
     <section
       id="gathering"
-      className="relative isolate scroll-mt-24 overflow-hidden bg-[#0a1f5c] pb-24 pt-24 text-white sm:pb-32 sm:pt-32 lg:min-h-[100svh]"
+      className="relative isolate scroll-mt-24 overflow-hidden bg-[#06102e] pb-24 pt-24 text-white sm:pb-32 sm:pt-32 lg:min-h-[100svh]"
     >
       {/* Blueprint backdrop */}
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_38%,#15398f_0%,#0f2a73_40%,#0a1f5c_75%,#06102e_100%)]" aria-hidden="true" />
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_38%,#0b1a4d_0%,#08143d_40%,#06102e_75%,#040b24_100%)]" aria-hidden="true" />
       <div className="absolute inset-x-0 top-0 -z-10 h-40 bg-gradient-to-b from-[#06102e] to-transparent" aria-hidden="true" />
       <div className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-[#06102e] to-transparent" aria-hidden="true" />
       <div

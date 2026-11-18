@@ -79,7 +79,7 @@ export function HeroInvitation({ details, registerUrl }: { details: HeroDetails;
   });
 
   return (
-    <section className="relative isolate flex flex-col overflow-hidden bg-[linear-gradient(180deg,#06102e_0%,#0a1f5c_40%,#163c94_74%,#0f2a73_100%)] px-5 pb-20 pt-28 sm:px-10 sm:pb-28 sm:pt-32 lg:min-h-[100svh]">
+    <section className="relative isolate flex flex-col overflow-hidden bg-[linear-gradient(180deg,#040b24_0%,#06102e_40%,#0b1a4d_74%,#08143d_100%)] px-5 pb-20 pt-28 sm:px-10 sm:pb-28 sm:pt-32 lg:min-h-[100svh]">
       {/* Floor: a soft horizon that the artwork sits on */}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[45%] bg-[radial-gradient(ellipse_80%_100%_at_50%_100%,rgba(245,184,46,0.16),transparent_75%)]"

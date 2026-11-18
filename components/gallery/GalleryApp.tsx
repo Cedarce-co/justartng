@@ -8,14 +8,24 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import * as THREE from "three";
 import { WorkWriteup } from "@/components/WorkWriteup";
 import { createAmbience, type Ambience } from "@/components/gallery/ambience";
+import { AvatarStage } from "@/components/gallery/AvatarPreview";
 import { galleryBus } from "@/components/gallery/bus";
 import { GalleryFallback } from "@/components/gallery/GalleryFallback";
 import { Scene } from "@/components/gallery/Scene";
 import { GLASS, GuideOffer, GuideTip, KeyHints, type GuideStep } from "@/components/gallery/StudioGuide";
 import { StudioMenu } from "@/components/gallery/StudioMenu";
+import { StudioCompanion } from "@/components/gallery/StudioCompanion";
 import { STUDIO_VISITED_KEY } from "@/components/home/StudioInvite";
 import type { Gender } from "@/components/gallery/Visitor";
-import { getRoom, mainRoom, roomWorks, rooms, roomsFor, studioHref, textureUrl, workMeta, works, type Room } from "@/lib/content";
+import { getRoom, mainRoom, roomWorks, rooms, roomsFor, splitEvents, studioHref, textureUrl, workMeta, works, type Room } from "@/lib/content";
+
+/** The next exhibition's date, e.g. "29 November", for the companion to mention. */
+function upcomingDate() {
+  const next = splitEvents().upcoming[0];
+  const time = next ? Date.parse(next.startsAt) : Number.NaN;
+  if (Number.isNaN(time)) return null;
+  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", timeZone: "Africa/Lagos" }).format(time);
+}
 import { DOOR_VIEW, hangWork, layoutRoom } from "@/lib/gallery";
 
 /** `heading` value while the visitor walks to the door rather than a painting. */
@@ -61,10 +71,12 @@ function useGalleryTextures() {
   useEffect(() => {
     let cancel = false;
     const loader = new THREE.TextureLoader();
+    // Phones get the lighter images: they look the same at phone size and use far less graphics memory.
+    const quality = window.matchMedia("(max-width: 768px), (pointer: coarse)").matches ? "standard" : "high";
     works.forEach((work) => {
       const key = work.slug;
       loader.load(
-        textureUrl(work.image, "high"),
+        textureUrl(work.image, quality),
         (texture) => {
           texture.colorSpace = THREE.SRGBColorSpace;
           texture.anisotropy = 8;
@@ -96,7 +108,7 @@ function useGalleryTextures() {
 
   const ready = works.every((work) => textures[work.slug] || failed[work.slug]);
   const loaded = works.filter((work) => textures[work.slug] || failed[work.slug]).length;
-  return { textures, ready, progress: (loaded / works.length) * 100 };
+  return { textures, kept, ready, progress: (loaded / works.length) * 100 };
 }
 
 function SoundIcon({ muted }: { muted: boolean }) {
@@ -121,64 +133,48 @@ const detailItem = {
 };
 
 function GenderGate({ onChoose }: { onChoose: (gender: Gender) => void }) {
+  const reduced = useReducedMotion();
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-[#12110f]/80 px-5 backdrop-blur-sm">
-      <div className="w-full max-w-xl text-center text-[#f6f3ee]">
-        <h2 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">Choose an avatar</h2>
-        <div className="mt-10 flex items-end justify-center gap-16 sm:gap-24">
-          <GenderChoice label="Man" gender="man" onChoose={onChoose} />
-          <GenderChoice label="Woman" gender="woman" onChoose={onChoose} />
+    <motion.div
+      className="absolute inset-0 z-50 flex items-center justify-center bg-[#12110f]/80 px-5 backdrop-blur-sm"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: reduced ? 0 : 0.5 }}
+    >
+      <div className="w-full max-w-2xl text-center text-[#f6f3ee]">
+        {/* The heading drops gently into place */}
+        <motion.h2
+          className="font-display text-2xl font-light italic tracking-tight sm:text-3xl"
+          initial={reduced ? false : { opacity: 0, y: -28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 160, damping: 18, delay: 0.2 }}
+        >
+          Choose an avatar
+        </motion.h2>
+        {/* Both figures share one 3D view; he walks in from the left, she from the right.
+            Two invisible buttons, one over each figure, make the choice. */}
+        <div className="relative mx-auto mt-6 h-64 w-[min(520px,100%)] sm:h-80">
+          <AvatarStage reduced={Boolean(reduced)} />
+          <div className="absolute inset-0 grid grid-cols-2">
+            {(["man", "woman"] as const).map((gender) => (
+              <button
+                key={gender}
+                type="button"
+                aria-label={gender === "man" ? "Man" : "Woman"}
+                className="group relative rounded-3xl bg-transparent focus-visible:outline-2 focus-visible:outline-white"
+                onClick={() => onChoose(gender)}
+              >
+                {/* A soft light pools under the figure you're about to choose */}
+                <span className="pointer-events-none absolute inset-x-[20%] bottom-2 h-10 rounded-full bg-white/0 blur-xl transition-colors duration-300 group-hover:bg-white/25 group-focus-visible:bg-white/25" aria-hidden="true" />
+              </button>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
-function GenderChoice({ label, gender, onChoose }: { label: string; gender: Gender; onChoose: (gender: Gender) => void }) {
-  const woman = gender === "woman";
-  return (
-    <motion.button
-      type="button"
-      className="bg-transparent p-0"
-      aria-label={label}
-      whileHover={{ y: -8, scale: 1.06 }}
-      whileTap={{ scale: 0.94 }}
-      onClick={() => onChoose(gender)}
-    >
-      <svg viewBox="0 0 120 168" className="h-44 w-auto sm:h-52" aria-hidden="true">
-        {woman ? (
-          <>
-            <path d="M34 52c-4 22-2 48 8 62 4-22 8-40 12-52 2 16 6 34 12 50 8-20 10-42 6-62-6-22-14-34-20-34s-14 12-18 36z" fill="#1c1410" />
-            <circle cx="60" cy="46" r="16" fill="#e4b48e" />
-            <path d="M38 74c8-12 36-12 44 0l16 54H22z" fill="#c4624e" />
-            <path d="M38 78c-10 6-16 20-14 34 7 1 12-4 13-10 2-8 4-16 9-20z" fill="#c4624e" />
-            <path d="M82 78c10 6 16 20 14 34-7 1-12-4-13-10-2-8-4-16-9-20z" fill="#c4624e" />
-            <circle cx="24" cy="114" r="5" fill="#e4b48e" />
-            <circle cx="96" cy="114" r="5" fill="#e4b48e" />
-            <path d="M50 126h8l-1 22h-9zM64 126h8l2 22h-9z" fill="#3a2a28" />
-            <ellipse cx="52" cy="152" rx="8" ry="3.5" fill="#141210" />
-            <ellipse cx="72" cy="152" rx="8" ry="3.5" fill="#141210" />
-          </>
-        ) : (
-          <>
-            <path d="M40 34c1-14 8-22 20-22s19 8 20 22c7 2 12 8 12 16v2H28v-2c0-8 5-14 12-16z" fill="#1c1410" />
-            <circle cx="60" cy="48" r="15" fill="#d7a679" />
-            <path d="M54 62h12v10H54z" fill="#d7a679" />
-            <path d="M32 76c10-10 46-10 56 0l8 48c-10 8-22 10-36 10s-26-2-36-10z" fill="#243e46" />
-            <path d="M52 74h16l-8 18z" fill="#f4ecdf" />
-            <path d="M32 80c-10 4-16 18-14 32 7 2 13-2 14-8 2-10 4-16 10-20z" fill="#243e46" />
-            <path d="M88 80c10 4 16 18 14 32-7 2-13-2-14-8-2-10-4-16-10-20z" fill="#243e46" />
-            <circle cx="20" cy="114" r="5.5" fill="#d7a679" />
-            <circle cx="100" cy="114" r="5.5" fill="#d7a679" />
-            <path d="M46 128h12l-2 24h-12zM64 128h12l2 24H66z" fill="#2a2622" />
-            <ellipse cx="50" cy="156" rx="9" ry="4" fill="#141210" />
-            <ellipse cx="76" cy="156" rx="9" ry="4" fill="#141210" />
-          </>
-        )}
-      </svg>
-    </motion.button>
-  );
-}
 
 export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: string | null; initialRoom: string | null }) {
   const router = useRouter();
@@ -206,7 +202,11 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
   const [booted, setBooted] = useState(false);
   const [gender, setGender] = useState<Gender | null>(null);
   const [muted, setMuted] = useState(false);
-  const { textures, ready, progress } = useGalleryTextures();
+  const { textures, kept: keptTextures, ready, progress } = useGalleryTextures();
+  // The companion's state: which paintings have been seen in this room, and the goodbye when leaving.
+  const [viewed, setViewed] = useState<string[]>([]);
+  const [farewell, setFarewell] = useState<string | null>(null);
+  const eventDate = useMemo(upcomingDate, []);
   const panelRef = useRef<HTMLElement>(null);
   const opener = useRef<HTMLElement | null>(null);
   const openedFromLink = useRef(false);
@@ -279,6 +279,8 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
     galleryBus.viewing = true;
     galleryBus.chime = true;
     setCurrent(index);
+    const slug = hungRef.current[index]?.slug;
+    if (slug) setViewed((seen) => (seen.includes(slug) ? seen : [...seen, slug]));
     // The painting's panel takes over; the guide is finished.
     setOffer(false);
     setTour(null);
@@ -327,6 +329,7 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
     galleryBus.glideTo = null;
     setCurrent(-1);
     setRoom(next);
+    setViewed([]);
     // Keep the address shareable without reloading the studio.
     window.history.replaceState(null, "", studioHref(next));
   }, []);
@@ -403,6 +406,12 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
           onCreated={({ gl }) => {
             gl.outputColorSpace = THREE.SRGBColorSpace;
             gl.toneMapping = THREE.NoToneMapping;
+            // Phones can drop the 3D view under memory pressure; when it comes back, re-send the paintings.
+            gl.domElement.addEventListener("webglcontextrestored", () => {
+              keptTextures.current.forEach((texture) => {
+                texture.needsUpdate = true;
+              });
+            });
           }}
         >
           {/* Keyed by room so the visitor starts fresh at the entrance of each room. */}
@@ -471,6 +480,18 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
             href="/"
             aria-label="Leave Studio"
             className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-4 text-sm transition-colors hover:bg-white hover:text-black ${GLASS}`}
+            onClick={(event) => {
+              // The guide says goodbye before the visitor goes back to the home page.
+              if (farewell) return;
+              event.preventDefault();
+              const seen = viewed.length;
+              setFarewell(
+                seen > 1
+                  ? `Thanks for walking with us! You saw ${seen} paintings today. See you at Hues That Heal 2.0.`
+                  : "Thanks for stopping by! Come back any time. See you at Hues That Heal 2.0.",
+              );
+              window.setTimeout(() => router.push("/"), reduced ? 1200 : 2200);
+            }}
           >
             Leave<span className="hidden sm:inline">&nbsp;Studio</span>
           </Link>
@@ -484,8 +505,9 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
             ref={panelRef}
             tabIndex={-1}
             aria-labelledby="work-title"
-            // A glass card that rises into the bottom-right corner: at most half the screen tall, scrolling inside.
-            className={`absolute inset-x-3 bottom-3 z-20 flex max-h-[55svh] flex-col overflow-hidden rounded-2xl outline-none sm:inset-x-auto sm:bottom-5 sm:right-5 sm:max-h-[50svh] sm:w-[min(400px,calc(100vw-2.5rem))] ${GLASS}`}
+            // A glass card that rises into the bottom-right corner, scrolling inside. On phones it is half
+            // the screen wide and short, so the painting and the visitor stay in view.
+            className={`absolute bottom-3 right-3 z-20 flex max-h-[34svh] w-[calc(50vw-0.75rem)] flex-col overflow-hidden rounded-2xl outline-none sm:bottom-5 sm:right-5 sm:max-h-[50svh] sm:w-[min(400px,calc(100vw-2.5rem))] ${GLASS}`}
             initial={reduced ? { opacity: 0 } : { y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={reduced ? { opacity: 0, transition: { duration: 0.01 } } : { y: 80, opacity: 0, transition: { duration: 0.25 } }}
@@ -494,14 +516,14 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
             <button
               type="button"
               aria-label="Close"
-              className="absolute left-3 top-3 z-10 grid size-9 place-items-center rounded-full bg-white/10 text-lg leading-none text-white/80 transition-colors hover:bg-white hover:text-black"
+              className="absolute left-2 top-2 z-10 grid size-8 place-items-center rounded-full bg-white/10 text-lg leading-none text-white/80 transition-colors hover:bg-white hover:text-black sm:left-3 sm:top-3 sm:size-9"
               onClick={close}
             >
               &times;
             </button>
             <motion.div
               aria-live="polite"
-              className="overflow-y-auto px-6 pb-6 pt-14"
+              className="overflow-y-auto px-3.5 pb-4 pt-11 sm:px-6 sm:pb-6 sm:pt-14"
               initial="hidden"
               animate="show"
               variants={{
@@ -512,20 +534,20 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
               <motion.p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/50" variants={detailItem}>
                 {room.name}
               </motion.p>
-              <motion.h2 id="work-title" className="mt-1.5 font-serif text-2xl leading-tight sm:text-[1.7rem]" variants={detailItem}>
+              <motion.h2 id="work-title" className="mt-1 font-serif text-base leading-tight sm:mt-1.5 sm:text-[1.7rem]" variants={detailItem}>
                 {work.title}
               </motion.h2>
-              <motion.p className="mt-1.5 text-sm text-white/70" variants={detailItem}>
+              <motion.p className="mt-1 text-xs text-white/70 sm:mt-1.5 sm:text-sm" variants={detailItem}>
                 {work.artist}
                 {work.year ? `, ${work.year}` : ""}
               </motion.p>
               {meta && (
-                <motion.p className="mt-0.5 border-b border-white/10 pb-4 text-sm text-white/50" variants={detailItem}>
+                <motion.p className="mt-0.5 border-b border-white/10 pb-3 text-xs text-white/50 sm:pb-4 sm:text-sm" variants={detailItem}>
                   {meta}
                 </motion.p>
               )}
               <motion.div variants={detailItem}>
-                <WorkWriteup text={work.writeup} className="mt-4 !text-base text-white/85" />
+                <WorkWriteup text={work.writeup} className="mt-3 !space-y-2.5 !text-[13px] !leading-snug text-white/85 sm:mt-4 sm:!space-y-4 sm:!text-base sm:!leading-relaxed" />
               </motion.div>
             </motion.div>
           </motion.aside>
@@ -543,6 +565,20 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
           <GuideTip key="tour" steps={steps} index={tour} onNext={nextStep} onSkip={() => setTour(null)} />
         )}
       </AnimatePresence>
+      {/* The studio companion: stays with the visitor once the first-visit guide is out of the way. */}
+      {support === "ok" && booted && gender && (
+        <StudioCompanion
+          room={room}
+          nextRoom={nextRoom}
+          works={hung}
+          viewed={viewed}
+          active={!offer && tour === null && !passing}
+          viewing={Boolean(work)}
+          eventDate={eventDate}
+          farewell={farewell}
+          onVisit={approach}
+        />
+      )}
       <AnimatePresence>
         {support === "ok" && booted && gender && !offer && tour === null && !work && <KeyHints key="keys" />}
       </AnimatePresence>

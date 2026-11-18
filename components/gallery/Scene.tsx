@@ -496,6 +496,8 @@ function Walker({
     pos.current.z = Math.max(-4.15, Math.min(4.15, pos.current.z));
     galleryBus.moving = moving;
     galleryBus.pace = pace;
+    galleryBus.x = pos.current.x;
+    galleryBus.z = pos.current.z;
     const body = pose.current;
     body.x = pos.current.x;
     body.z = pos.current.z;
@@ -511,17 +513,17 @@ function Walker({
       const aspect = (camera as THREE.PerspectiveCamera).aspect || 1;
       const halfAcross = Math.tan(half) * aspect;
       // Desktop: the painting fills most of the height beside the details card.
-      // Phones: it sits in the top half of the screen, clear of the card, and fits the narrow width too.
-      const fill = galleryBus.wide ? 0.74 : 0.34;
+      // Phones: it fills nearly the full width and most of the height, sitting just above the card.
+      const fill = galleryBus.wide ? 0.74 : 0.62;
       const fitHeight = span / (2 * Math.tan(half) * fill);
-      const fitWidth = span / (2 * halfAcross * 0.86);
-      const dist = THREE.MathUtils.clamp(Math.max(fitHeight, fitWidth), 1.7, galleryBus.wide ? 3.3 : 7);
+      const fitWidth = span / (2 * halfAcross * 0.96);
+      const dist = THREE.MathUtils.clamp(Math.max(fitHeight, fitWidth), galleryBus.wide ? 1.7 : 1.1, galleryBus.wide ? 3.3 : 7);
       const nx = Math.sin(face);
       const nz = Math.cos(face);
       desired.set(focus.x + nx * dist, focus.y + span * 0.06, focus.z + nz * dist);
       const slide = galleryBus.wide ? dist * 0.2 : 0;
       // Aim below the painting so it rises to the upper part of a phone screen.
-      const lift = galleryBus.wide ? 0 : 0.2 * 2 * dist * Math.tan(half);
+      const lift = galleryBus.wide ? 0 : 0.12 * 2 * dist * Math.tan(half);
       look.set(focus.x + Math.cos(face) * slide, focus.y - lift, focus.z - Math.sin(face) * slide);
       targetFov = 36;
     } else {

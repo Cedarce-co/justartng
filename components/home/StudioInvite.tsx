@@ -70,7 +70,7 @@ export function StudioInvite() {
             transition={reduced ? undefined : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
           />
 
-          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-[linear-gradient(160deg,#163c94_0%,#0a1f5c_55%,#06102e_100%)] p-5 text-white shadow-[0_30px_80px_rgba(2,8,30,0.6)]">
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-[linear-gradient(160deg,#0b1a4d_0%,#08143d_55%,#040b24_100%)] p-5 text-white shadow-[0_30px_80px_rgba(2,8,30,0.6)]">
             {/* Thin rainbow rule in the 2.0 colours */}
             <span className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#f97316,#facc15,#38bdf8)]" aria-hidden="true" />
 
@@ -99,16 +99,16 @@ export function StudioInvite() {
                 ))}
               </div>
 
-              <div className="min-w-0 pr-6">
-                <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#f5d08a]">
-                  <span className="relative flex size-2" aria-hidden="true">
-                    {!reduced && <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#f5b82e] opacity-75" />}
-                    <span className="relative inline-flex size-2 rounded-full bg-[#f5b82e]" />
+              <div className="min-w-0 self-center pr-6">
+                <h2 id="studio-invite-title" className="font-display">
+                  <span className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.2em] text-[#f5d08a]">
+                    <span className="relative flex size-2.5 shrink-0" aria-hidden="true">
+                      {!reduced && <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#f5b82e] opacity-75" />}
+                      <span className="relative inline-flex size-2.5 rounded-full bg-[#f5b82e]" />
+                    </span>
+                    Now open in
                   </span>
-                  Now open in 3D
-                </p>
-                <h2 id="studio-invite-title" className="font-display mt-2 text-2xl font-bold leading-tight tracking-[-0.02em]">
-                  Step inside <span className="text-hues whitespace-nowrap">Faith Alive</span>
+                  <span className="text-hues mt-1 block pb-1 text-7xl font-black leading-none tracking-[-0.04em]"> 3D</span>
                 </h2>
               </div>
             </div>

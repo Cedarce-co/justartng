@@ -69,11 +69,11 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
   return (
     <section
       id="artist"
-      className="relative isolate overflow-hidden bg-[linear-gradient(180deg,#0f2a73_0%,#0a1f5c_35%,#06102e_100%)] text-white lg:min-h-[100svh]"
+      className="relative isolate overflow-hidden bg-[linear-gradient(180deg,#08143d_0%,#06102e_35%,#040b24_100%)] text-white lg:min-h-[100svh]"
     >
       {/* Glow behind the portrait */}
       <motion.div
-        className="pointer-events-none absolute -z-10 aspect-square w-[42rem] rounded-full bg-[radial-gradient(closest-side,rgba(47,123,240,0.55),rgba(23,72,196,0.25)_55%,transparent)] blur-2xl max-lg:left-1/2 max-lg:top-[46%] max-lg:w-[34rem] max-lg:-translate-x-1/2 lg:right-[-6rem] lg:top-[12%]"
+        className="pointer-events-none absolute -z-10 aspect-square w-[42rem] rounded-full bg-[radial-gradient(closest-side,rgba(47,123,240,0.32),rgba(23,72,196,0.14)_55%,transparent)] blur-2xl max-lg:left-1/2 max-lg:top-[46%] max-lg:w-[34rem] max-lg:-translate-x-1/2 lg:right-[-6rem] lg:top-[12%]"
         aria-hidden="true"
         animate={reduced ? undefined : { scale: [1, 1.12, 1], opacity: [0.75, 1, 0.75] }}
         transition={reduced ? undefined : { duration: 7, repeat: Infinity, ease: "easeInOut" }}
@@ -171,7 +171,8 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
             </motion.button>
           </motion.div>
 
-          <motion.div variants={slideIn} className="mt-8 max-w-lg">
+          {/* Desktop: beside the portrait. Phones get it below the portrait instead (end of the section). */}
+          <motion.div variants={slideIn} className="mt-8 hidden max-w-lg lg:block">
             <DragToEnter href="/visual-studio?room=portfolio" hint="Drag to enter the 3D studio" label="See Lekan’s art collection in 3D" />
           </motion.div>
         </motion.div>
@@ -209,7 +210,7 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
 
       {/* Bottom bar */}
       <motion.div
-        className="relative z-20 mx-auto -mt-16 w-full max-w-6xl px-5 pb-16 sm:px-8 lg:absolute lg:inset-x-0 lg:bottom-16 lg:mt-0 lg:pb-0"
+        className="relative z-20 mx-auto -mt-16 w-full max-w-6xl px-5 pb-6 sm:px-8 lg:absolute lg:inset-x-0 lg:bottom-16 lg:mt-0 lg:pb-0"
         initial={reduced ? false : { opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.6 }}
@@ -249,6 +250,17 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
             </span>
           </div>
         </div>
+      </motion.div>
+
+      {/* Phones: the way into his studio comes after his portrait, not over it. */}
+      <motion.div
+        className="relative z-20 mx-auto w-full max-w-lg px-5 pb-16 lg:hidden"
+        initial={reduced ? false : { opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ duration: reduced ? 0 : 0.7, ease }}
+      >
+        <DragToEnter href="/visual-studio?room=portfolio" hint="Drag to enter the 3D studio" label="See Lekan’s art collection in 3D" />
       </motion.div>
     </section>
   );

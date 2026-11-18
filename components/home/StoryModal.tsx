@@ -145,7 +145,7 @@ export function StoryModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby="story-title"
-            className="relative flex max-h-[92svh] w-full max-w-6xl flex-col overflow-hidden rounded-t-[2rem] border border-white/15 bg-[linear-gradient(160deg,#0f2a73_0%,#0a1f5c_45%,#06102e_100%)] text-white shadow-[0_40px_120px_rgba(3,10,31,0.8)] sm:rounded-[2rem]"
+            className="relative flex max-h-[92svh] w-full max-w-6xl flex-col overflow-hidden rounded-t-[2rem] border border-white/15 bg-[linear-gradient(160deg,#0b1a4d_0%,#08143d_45%,#040b24_100%)] text-white shadow-[0_40px_120px_rgba(3,10,31,0.8)] sm:rounded-[2rem]"
             initial={reduced ? { opacity: 0 } : { y: "100%", opacity: 0.6 }}
             animate={{ y: 0, opacity: 1 }}
             exit={reduced ? { opacity: 0 } : { y: "100%", opacity: 0 }}
