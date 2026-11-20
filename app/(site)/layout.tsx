@@ -1,5 +1,6 @@
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { isStudioOpen } from "@/lib/content";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -10,7 +11,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       >
         Skip to content
       </a>
-      <SiteHeader />
+      <SiteHeader studioOpen={isStudioOpen()} />
       <main id="content" className="flex-1">
         {children}
       </main>

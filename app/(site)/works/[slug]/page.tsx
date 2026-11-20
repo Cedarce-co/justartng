@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { WorkWriteup } from "@/components/WorkWriteup";
-import { getWork, neighbors, roomsFor, studioHref, works, workMeta } from "@/lib/content";
+import { buyLabel, getWork, isSold, isStudioOpen, neighbors, roomsFor, site, studioHref, works, workMeta } from "@/lib/content";
 import { InteractiveImage } from "@/components/InteractiveImage";
+
+// Re-check every few minutes, so the works appear on the opening day.
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return works.map((work) => ({ slug: work.slug }));
@@ -22,6 +25,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function WorkPage({ params }: { params: Promise<{ slug: string }> }) {
+  // The collection is shown from the opening day, with the studio. Until then, the home page announces it.
+  if (!isStudioOpen()) redirect("/#studio");
   const { slug } = await params;
   const work = getWork(slug);
   if (!work) notFound();
@@ -63,9 +68,27 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
         </dl>
         {meta && <p className="sr-only">{meta}</p>}
         <WorkWriteup text={work.writeup} className="mt-6" />
-        <Link href={workRooms[0] ? studioHref(workRooms[0], work.slug) : `/visual-studio?work=${work.slug}`} className="mt-8 inline-flex min-h-11 items-center rounded-md bg-accent px-4 text-on">
-          View in the visual studio
-        </Link>
+        <div className="mt-8 flex flex-wrap items-center gap-3">
+          {/* Buy the original while it's available; once sold, prints. Both open the same short form. */}
+          <a
+            href={site.interestForm}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center rounded-md bg-accent px-4 text-on"
+          >
+            {buyLabel(work)} &rarr;<span className="sr-only"> (opens a form in a new tab)</span>
+          </a>
+          <Link
+            href={workRooms[0] ? studioHref(workRooms[0], work.slug) : `/visual-studio?work=${work.slug}`}
+            className="inline-flex min-h-11 items-center rounded-md border border-line px-4"
+          >
+            View in the visual studio
+          </Link>
+        </div>
+        <p className="mt-3 flex items-center gap-1.5 text-sm text-muted">
+          <span className={`size-2 rounded-full ${isSold(work) ? "bg-[#e5484d]" : "bg-[#3dd68c]"}`} aria-hidden="true" />
+          {isSold(work) ? "The original has found a home; prints are available." : "The original is available."}
+        </p>
         {previous && next && (
           <nav aria-label="More works" className="mt-10 flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:justify-between">
             <Link href={`/works/${previous.slug}`} className="text-accent underline-offset-4 hover:underline">

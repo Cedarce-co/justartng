@@ -5,8 +5,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { galleryBus } from "@/components/gallery/bus";
 import type { HungWork } from "@/components/gallery/Scene";
 import { GLASS } from "@/components/gallery/StudioGuide";
-import { site, type Room } from "@/lib/content";
-import { PAYMENT_METHODS } from "@/lib/validation";
+import { buyLabel, isSold, site, type Room } from "@/lib/content";
 import { DOOR, hangWork } from "@/lib/gallery";
 
 /*
@@ -32,6 +31,12 @@ type Note = {
   spot?: string;
   history?: Line[];
 };
+
+/** How the guide refers to a work's artist: "Lekan" for Olalekan, otherwise their first name. */
+function artistName(work: { artist: string }) {
+  if (work.artist === site.artist) return "Lekan";
+  return work.artist.split(/\s+/)[0];
+}
 
 /** The first sentence of a painting's story: Lekan's message in it, in a line. */
 function messageOf(writeup: string) {
@@ -212,12 +217,49 @@ export function StudioCompanion({
     [hide, surprise],
   );
 
-  /** General chatter, taken in turn: facts, Lekan's voice, quizzes and questions that answer back. */
+  /**
+   * General chatter, taken in turn: facts, the artist's voice, quizzes and questions that answer back.
+   * Some notes belong to one room (they name its paintings); those are skipped elsewhere.
+   */
   const generalNote = useCallback((): Note => {
     const { room: here } = state.current;
     const goTo = (label: string, slug: string): Action => ({ label, run: () => visitSlug(slug) });
-    const notes: (() => Note)[] = [
-      () => ({
+    /** Only in the given rooms. */
+    const only = (ids: string[], make: () => Note) => () => (ids.includes(here.id) ? make() : null);
+    const MAIN = "exhibition";
+    const MELODY = "melody";
+    const FIRST = "hues-1";
+    const notes: (() => Note | null)[] = [
+      only([MELODY], () => ({
+        key: "melody-fabric",
+        text: "Look closely: Melody works real Ankara fabric into some of her drawings. Can you spot it?",
+        ttl: 14000,
+        actions: [goTo("Show me one", "unbothered")],
+      })),
+      only([MELODY], () => ({ key: "melody-charcoal", text: "Most of what you see in this room is charcoal and graphite: black, white and grey, and still so much light." })),
+      only([MELODY], () => ({
+        key: "quiz-crown",
+        text: "Quiz time! In which drawing are two hands placing a crown on someone's head?",
+        ttl: 16000,
+        actions: [
+          { label: "Well Done", run: () => show({ key: "quiz-crown-right", text: "Yes! The crown of righteousness, the reward of a faithful life. Want to see it up close?", actions: [goTo("Take me there", "well-done")] }) },
+          { label: "Even Kings Bow", run: () => show({ key: "quiz-crown-wrong", text: "Close! That king already wears his crown, and bows his head. The hands are in Well Done.", actions: [goTo("Show me", "well-done")] }) },
+          { label: "African Bride", run: () => show({ key: "quiz-crown-wrong2", text: "Good guess, but the bride's crown is already on. The hands are in Well Done.", actions: [goTo("Show me", "well-done")] }) },
+        ],
+      })),
+      only([FIRST], () => ({ key: "first-red-dot", text: "See a red dot by a title? That original has found a home. You can still order a print of it." })),
+      only([FIRST], () => ({ key: "first-began", text: "This room is where the journey began: the first Hues That Heal collection." })),
+      only([FIRST], () => ({
+        key: "quiz-water",
+        text: "Quiz time! Which painting remembers Peter walking on the water?",
+        ttl: 16000,
+        actions: [
+          { label: "The Walk / Gaze", run: () => show({ key: "quiz-water-right", text: "Spot on! Eyes on Jesus, and the storm can't win. Want to see it?", actions: [goTo("Take me there", "the-walk")] }) },
+          { label: "Peace in Chaos", run: () => show({ key: "quiz-water-wrong", text: "Not quite: Peace in Chaos is a dove above the storm. Peter's walk is The Walk / Gaze.", actions: [goTo("Show me", "the-walk")] }) },
+          { label: "The Path", run: () => show({ key: "quiz-water-wrong2", text: "Good guess, but The Path is a forest trail. Peter's walk is The Walk / Gaze.", actions: [goTo("Show me", "the-walk")] }) },
+        ],
+      })),
+      only([MAIN], () => ({
         key: "why-here",
         text: "So, what brings you to the studio today?",
         ttl: 15000,
@@ -226,9 +268,9 @@ export function StudioCompanion({
           { label: "Love of art", run: () => show({ key: "why-art", text: "A fellow art lover! Look closely at the knife-work: Lekan builds the paint up thick, so it catches light like sculpture." }) },
           { label: "Just curious", run: () => show({ key: "why-curious", text: "Curiosity is the best way in. Let me pick something for you.", actions: [{ label: "Surprise me", run: surprise }] }) },
         ],
-      }),
-      () => ({ key: "real-size", text: "Fun fact: every painting in here hangs at its real size. Some are taller than you!" }),
-      () => ({
+      })),
+      () => ({ key: "real-size", text: "Fun fact: every work in here hangs at its real size. Some are taller than you!" }),
+      only([MAIN], () => ({
         key: "colour",
         text: "Quick question: which colour keeps catching your eye?",
         ttl: 14000,
@@ -237,9 +279,9 @@ export function StudioCompanion({
           { label: "Blue", run: () => show({ key: "colour-blue", text: "Blue it is. The Good Fight of Faith has plenty. Want to see?", actions: [goTo("Take me there", "the-good-fight-of-faith")] }) },
           { label: "Gold", run: () => show({ key: "colour-gold", text: "Gold lovers usually fall for the Syrophoenician Woman.", actions: [goTo("Show me", "syrophoenician-woman")] }) },
         ],
-      }),
-      () => ({ key: "lekan-words", text: `Lekan says: “${site.artistWord}”` }),
-      () => ({
+      })),
+      only([MAIN, FIRST], () => ({ key: "lekan-words", text: `Lekan says: “${site.artistWord}”` })),
+      only([MAIN], () => ({
         key: "quiz-dove",
         text: "Quiz time! In which painting does a dove come down from heaven?",
         ttl: 16000,
@@ -248,9 +290,9 @@ export function StudioCompanion({
           { label: "Hope", run: () => show({ key: "quiz-dove-wrong", text: "Good guess, but it's The Promise. Hope shows the cross and the empty tomb. Want to see the dove?", actions: [goTo("Show me", "the-promise")] }) },
           { label: "Bond", run: () => show({ key: "quiz-dove-wrong2", text: "Not quite: Bond is a mother carrying her baby. The dove is in The Promise.", actions: [goTo("Show me", "the-promise")] }) },
         ],
-      }),
+      })),
       () => ({ key: "slow", text: "Take your time. Good art likes a slow look." }),
-      () => ({
+      only([MAIN, FIRST], () => ({
         key: "nollywood",
         text: "Did you know? Before these paintings, Lekan designed film sets for Nollywood, like A Tribe Called Judah and Everybody Loves Jenifa.",
         ttl: 14000,
@@ -258,19 +300,19 @@ export function StudioCompanion({
           { label: "No way!", run: () => show({ key: "nollywood-wow", text: "True! That's why his paintings feel like scenes from a story. Every one has a beginning, a middle and a message." }) },
           { label: "I knew that", run: () => show({ key: "nollywood-knew", text: "A true fan! Then you'll spot the set designer's eye in how he frames each moment." }) },
         ],
-      }),
+      })),
       () => ({ key: "surprise", text: "Feeling adventurous? I can pick a painting for you.", ttl: 12000, actions: [{ label: "Surprise me", run: surprise }] }),
       () => ({
         key: "owned",
-        text: "Have you ever owned an original painting?",
+        text: "Have you ever owned an original artwork?",
         ttl: 14000,
         actions: [
-          { label: "Yes", run: () => show({ key: "owned-yes", text: "Then you know the feeling. Every painting here is an original you can collect. Tell me when one speaks to you." }) },
-          { label: "Not yet", run: () => show({ key: "owned-no", text: "Every collection starts with one. When a painting stops you in your tracks, I'll help you make it yours." }) },
+          { label: "Yes", run: () => show({ key: "owned-yes", text: "Then you know the feeling. Stand with one you love: you can buy the original while it's available, or a print. Tell me when one speaks to you." }) },
+          { label: "Not yet", run: () => show({ key: "owned-no", text: "Every collection starts with one. When a work stops you in your tracks, I'll help you make it yours." }) },
         ],
       }),
-      () => ({ key: "theme", text: "This year's theme is Faith Alive: faith that moves beyond words into action. See if you can feel it in each painting." }),
-      () => ({
+      only([MAIN], () => ({ key: "theme", text: "This year's theme is Faith Alive: faith that moves beyond words into action. See if you can feel it in each painting." })),
+      only([MAIN], () => ({
         key: "mood",
         text: "Pick one word for how you feel right now.",
         ttl: 14000,
@@ -279,9 +321,9 @@ export function StudioCompanion({
           { label: "Inspired", run: () => show({ key: "mood-inspired", text: "Love that! The Good Fight of Faith is pure energy. Go and feel the run.", actions: [goTo("Take me there", "the-good-fight-of-faith")] }) },
           { label: "Curious", run: () => show({ key: "mood-curious", text: "Then Symphonia is your painting: four people, one prayer. What are they praying for?", actions: [goTo("Take me there", "symphonia")] }) },
         ],
-      }),
-      () => ({ key: "texture", text: "Walk right up to a painting, then step back. The thick paint changes as you move." }),
-      () => ({
+      })),
+      only([MAIN, FIRST], () => ({ key: "texture", text: "Walk right up to a painting, then step back. The thick paint changes as you move." })),
+      only([MAIN], () => ({
         key: "soundtrack",
         text: "If this studio had a soundtrack, what would it be?",
         ttl: 14000,
@@ -290,7 +332,7 @@ export function StudioCompanion({
           { label: "Afrobeats", run: () => show({ key: "sound-afro", text: "Ha! The Good Fight of Faith would definitely be dancing." }) },
           { label: "Soft piano", run: () => show({ key: "sound-piano", text: "Beautiful. That's the music I hear in Unwavering." }) },
         ],
-      }),
+      })),
       () => ({
         key: "visit",
         text: eventDate ? `Hues That Heal 2.0 opens on ${eventDate}. Will we see you there?` : "Will we see you at the exhibition in person?",
@@ -302,215 +344,38 @@ export function StudioCompanion({
       }),
       () => ({ key: "challenge", text: "Mini challenge: visit three paintings you haven't seen yet. I'll cheer you on!", ttl: 10000, actions: [{ label: "I'm in!", run: surprise }] }),
       () => ({ key: "shift", text: "Tip: hold Shift while you walk to move faster." }),
-      () => ({ key: "stories", text: `Every painting in ${here.name} has a story. Tap one and read it while you stand there.` }),
-      () => ({ key: "collect-hint", text: "Psst: every painting here is an original you can collect. Stand in front of one you love and I'll help you." }),
+      () => ({ key: "stories", text: `Every work in ${here.name} has a story. Tap one and read it while you stand there.` }),
+      () => ({ key: "collect-hint", text: "Psst: tap any work and you'll find a Buy button with its story: the original while it's available, or a print." }),
     ];
-    const next = notes[pool.current % notes.length]();
-    pool.current += 1;
-    return next;
+    // Take the next note that belongs in this room.
+    for (let tries = 0; tries < notes.length; tries += 1) {
+      const next = notes[pool.current % notes.length]();
+      pool.current += 1;
+      if (next) return next;
+    }
+    return { key: "slow", text: "Take your time. Good art likes a slow look." };
   }, [eventDate, show, surprise, visitSlug]);
 
   /* ---------------------------------------------------------------- */
-  /* Collecting a painting: the guide gathers the details in a chat.   */
+  /* Collecting: the buttons open the short collector form in a new tab. */
   /* ---------------------------------------------------------------- */
 
-  type Collecting = { work: HungWork; name: string; phone: string; payment: string; address: string; delivery: string };
-  type Step = "name" | "phone" | "payment" | "address" | "delivery" | "date" | "confirm";
-  const collecting = useRef<Collecting | null>(null);
-  const collected = useRef(new Set<string>());
-  const step = useRef<(next: Step, hint?: string) => void>(() => {});
   const stamp = () => Date.now().toString(36);
 
-  const stopCollecting = useCallback(
-    (text = "No problem, I've cleared that. Enjoy the rest of the studio!") => {
-      collecting.current = null;
-      show({ key: `c-cancel-${stamp()}`, text });
-    },
-    [show],
-  );
-  const cancel: Action = { label: "Cancel", run: () => stopCollecting() };
-
-  const send = useCallback(async () => {
-    const order = collecting.current;
-    if (!order) return;
-    const first = order.name.split(/\s+/)[0];
-    show({ key: `c-sending-${stamp()}`, sticky: true, text: "Sending this to Lekan's team…" });
-    try {
-      const response = await fetch("/api/collect", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          workSlug: order.work.slug,
-          room: state.current.room.id,
-          fullName: order.name,
-          phone: order.phone,
-          payment: order.payment,
-          address: order.address,
-          delivery: order.delivery,
-        }),
-      });
-      const data = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
-      if (!response.ok || !data.ok) throw new Error(data.error || "Something went wrong.");
-      collected.current.add(order.work.slug);
-      collecting.current = null;
+  const openForm = useCallback(
+    (work: HungWork) => {
+      window.open(site.interestForm, "_blank", "noopener,noreferrer");
       show({
-        key: `c-done-${stamp()}`,
+        key: `c-form-${stamp()}`,
         ttl: 16000,
-        text: `Done! Thank you, ${first}. Lekan's team will reach you on WhatsApp soon to confirm the price and delivery of “${order.work.title}”.`,
+        text: `I've opened a short form in a new tab. Add “${work.title}” and your details, and the team will follow up with you.`,
         actions: [{ label: "Keep exploring", run: surprise }],
       });
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : "Something went wrong.";
-      show({
-        key: `c-failed-${stamp()}`,
-        sticky: true,
-        text: `I couldn't send that just now. ${reason}`,
-        actions: [{ label: "Try again", run: () => void send() }, { label: "Cancel", run: () => stopCollecting() }],
-      });
-    }
-  }, [show, surprise, stopCollecting]);
-
-  // One question at a time. Each answer is checked kindly before moving on.
-  step.current = (next, hint) => {
-    const order = collecting.current;
-    if (!order) return;
-    const lead = hint ? `${hint} ` : "";
-    const key = `c-${next}-${stamp()}`;
-    switch (next) {
-      case "name":
-        show({
-          key,
-          sticky: true,
-          text: `${lead}${hint ? "" : `Wonderful choice! Let's make “${order.work.title}” yours. `}What's your full name?`,
-          ask: {
-            placeholder: "Your full name",
-            submit: (value) => {
-              if (value.trim().length < 2) return step.current("name", "I didn't quite catch that.");
-              order.name = value.trim();
-              step.current("phone");
-            },
-          },
-          actions: [cancel],
-        });
-        return;
-      case "phone":
-        show({
-          key,
-          sticky: true,
-          text: `${lead}${hint ? "" : `Lovely to meet you, ${order.name.split(/\s+/)[0]}! `}What's your WhatsApp or phone number?`,
-          ask: {
-            placeholder: "+234 …",
-            type: "tel",
-            submit: (value) => {
-              const digits = value.replace(/\D/g, "");
-              if (digits.length < 7 || !/^[+\d\s()-]+$/.test(value.trim())) return step.current("phone", "Hmm, that doesn't look like a full number.");
-              order.phone = value.trim();
-              step.current("payment");
-            },
-          },
-          actions: [cancel],
-        });
-        return;
-      case "payment":
-        show({
-          key,
-          sticky: true,
-          text: "How would you like to pay?",
-          actions: [
-            ...PAYMENT_METHODS.map((method) => ({
-              label: method,
-              run: () => {
-                order.payment = method;
-                step.current("address");
-              },
-            })),
-            cancel,
-          ],
-        });
-        return;
-      case "address":
-        show({
-          key,
-          sticky: true,
-          text: `${lead}${hint ? "" : "Great. "}Where should we deliver it? Please type the full address.`,
-          ask: {
-            placeholder: "House number, street, city",
-            submit: (value) => {
-              if (value.trim().length < 8) return step.current("address", "Could you add a little more detail?");
-              order.address = value.trim();
-              step.current("delivery");
-            },
-          },
-          actions: [cancel],
-        });
-        return;
-      case "delivery":
-        show({
-          key,
-          sticky: true,
-          text: "And when would you like it delivered?",
-          actions: [
-            ...["As soon as possible", "After the exhibition"].map((when) => ({
-              label: when,
-              run: () => {
-                order.delivery = when;
-                step.current("confirm");
-              },
-            })),
-            { label: "I'll pick a date", run: () => step.current("date") },
-            cancel,
-          ],
-        });
-        return;
-      case "date":
-        show({
-          key,
-          sticky: true,
-          text: `${lead}Sure! Type the date or time that works best for you.`,
-          ask: {
-            placeholder: "e.g. 5 December, afternoon",
-            submit: (value) => {
-              if (value.trim().length < 2) return step.current("date", "I didn't catch a date.");
-              order.delivery = value.trim();
-              step.current("confirm");
-            },
-          },
-          actions: [cancel],
-        });
-        return;
-      case "confirm":
-        show({
-          key,
-          sticky: true,
-          text: [
-            "Here's what I have:",
-            "",
-            `Painting: ${order.work.title}`,
-            `Name: ${order.name}`,
-            `WhatsApp: ${order.phone}`,
-            `Payment: ${order.payment}`,
-            `Deliver to: ${order.address}`,
-            `When: ${order.delivery}`,
-            "",
-            "Shall I send this to Lekan's team? They'll only use it to arrange your painting.",
-          ].join("\n"),
-          actions: [{ label: "Yes, send it", run: () => void send() }, { label: "Start over", run: () => step.current("name") }, cancel],
-        });
-        return;
-    }
-  };
-
-  const startCollecting = useCallback(
-    (work: HungWork) => {
-      collecting.current = { work, name: "", phone: "", payment: "", address: "", delivery: "" };
-      // Give the conversation room: the painting list folds away while they answer.
-      onFocusChat?.();
-      step.current("name");
     },
-    [onFocusChat],
+    [show, surprise],
   );
 
-  // Not ready to collect: no pressure, and a moment with the painting's message instead.
+  // Not ready to collect: no pressure, and a moment with the work's message instead.
   const notNow = useCallback(
     (work: HungWork) => {
       const message = messageOf(work.writeup);
@@ -518,8 +383,8 @@ export function StudioCompanion({
         key: `c-notnow-${stamp()}`,
         ttl: 18000,
         text: message
-          ? `That's perfectly fine! Stay with it a little longer. Lekan's message in it: “${message}”`
-          : "That's perfectly fine! Stay with it a little longer. Lekan paints faith you can feel, beyond the colours.",
+          ? `That's perfectly fine! Stay with it a little longer. ${artistName(work)}'s message in it: “${message}”`
+          : `That's perfectly fine! Stay with it a little longer. ${artistName(work)} makes faith you can feel, beyond the colours.`,
         actions: [
           { label: "Show me another", run: surprise },
           { label: "I'll stay here", run: () => show({ key: `c-stay-${stamp()}`, text: "Take all the time you need. I'll be around if you need me." }) },
@@ -529,19 +394,31 @@ export function StudioCompanion({
     [show, surprise],
   );
 
-  /** A friendly question about the painting itself, with no selling, asked while the visitor looks. */
+  /** A friendly question about the work itself, with no selling, asked while the visitor looks. */
   const reflectOn = useCallback(
     (work: HungWork): Note => {
+      const name = artistName(work);
       const message = messageOf(work.writeup);
-      const lekan = message ? `Lekan's message in it: “${message}”` : "Lekan paints faith you can feel, beyond the colours.";
+      const voice = message ? `${name}'s message in it: “${message}”` : `${name} makes faith you can feel, beyond the colours.`;
+      const drawn = work.artist !== site.artist;
       return {
         key: `reflect-${work.slug}`,
         ttl: 16000,
         text: `What stands out to you first in “${work.title}”?`,
         actions: [
-          { label: "The colours", run: () => show({ key: `reflect-c-${work.slug}`, ttl: 12000, text: `Lekan builds his colour up thick, so it catches the light like sculpture. ${lekan}` }) },
-          { label: "The people", run: () => show({ key: `reflect-p-${work.slug}`, ttl: 12000, text: `Look at their hands and faces: that's where Lekan puts the feeling. ${lekan}` }) },
-          { label: "The story", run: () => show({ key: `reflect-s-${work.slug}`, ttl: 12000, text: `Every painting here starts from a story of faith. ${lekan}` }) },
+          {
+            label: drawn ? "The detail" : "The colours",
+            run: () =>
+              show({
+                key: `reflect-c-${work.slug}`,
+                ttl: 12000,
+                text: drawn
+                  ? `${name} draws in charcoal and graphite, adding touches of colour and sometimes real Ankara fabric. ${voice}`
+                  : `${name} builds his colour up thick, so it catches the light like sculpture. ${voice}`,
+              }),
+          },
+          { label: "The people", run: () => show({ key: `reflect-p-${work.slug}`, ttl: 12000, text: `Look at their hands and faces: that's where ${name} puts the feeling. ${voice}` }) },
+          { label: "The story", run: () => show({ key: `reflect-s-${work.slug}`, ttl: 12000, text: `Every work here starts from a story of faith. ${voice}` }) },
         ],
       };
     },
@@ -564,7 +441,6 @@ export function StudioCompanion({
     const arrived = performance.now();
 
     const timer = window.setInterval(() => {
-      if (collecting.current) return;
       const seconds = (performance.now() - arrived) / 1000;
       const showing = noteRef.current;
       // Wait for any other conversation to finish first.
@@ -574,14 +450,16 @@ export function StudioCompanion({
         show(reflectOn(current));
         return;
       }
-      if (seconds >= readSeconds && !said.current.has(askKey) && !collected.current.has(current.slug)) {
+      if (seconds >= readSeconds && !said.current.has(askKey)) {
         onFocusChat?.();
         show({
           key: askKey,
           ttl: 20000,
-          text: `You've spent a while with “${current.title}”. Do you love it enough to make it yours? It's an original, available to collect.`,
+          text: isSold(current)
+            ? `You've spent a while with “${current.title}”. The original has found a home, but you can still have it on your wall: prints are available.`
+            : `You've spent a while with “${current.title}”. Do you love it enough to make it yours? The original is available.`,
           actions: [
-            { label: "Yes, I'm interested", run: () => startCollecting(current) },
+            { label: buyLabel(current), run: () => openForm(current) },
             { label: "Not right now", run: () => notNow(current) },
           ],
         });
@@ -589,7 +467,7 @@ export function StudioCompanion({
       }
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [active, farewell, current, room.id, show, reflectOn, startCollecting, notNow, onFocusChat]);
+  }, [active, farewell, current, room.id, show, reflectOn, openForm, notNow, onFocusChat]);
 
   // Welcome on arrival in each room, once the first-visit guide is out of the way.
   useEffect(() => {
@@ -632,8 +510,6 @@ export function StudioCompanion({
       const now = performance.now();
       if (galleryBus.moving) lastMoveAt.current = now;
 
-      // Never interrupt a visitor who is giving their details.
-      if (collecting.current) return;
       const showing = noteRef.current;
       if (showing) {
         if (showing.sticky || showing.ask) return;
@@ -776,11 +652,7 @@ export function StudioCompanion({
               type="button"
               aria-label="Hide this message"
               className={`absolute -top-2 grid size-6 place-items-center rounded-full bg-black/70 text-sm leading-none text-white/70 opacity-100 transition-opacity hover:text-white sm:opacity-0 sm:group-hover:opacity-100 ${guideOnRight ? "left-0" : "right-0"}`}
-              onClick={() => {
-                // Closing mid-way through collecting abandons it quietly.
-                collecting.current = null;
-                hide();
-              }}
+              onClick={hide}
             >
               &times;
             </button>

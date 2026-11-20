@@ -100,7 +100,8 @@ function WallLabel({ text, width, position, rotation }: { text: string; width: n
 const TITLE_HEIGHT = 0.085;
 
 /** The painting's title, painted on the wall just above its frame. */
-function FrameTitle({ text, y, index }: { text: string; y: number; index: number }) {
+/** The title above a frame. A sold painting gets a red dot after it, as galleries mark them. */
+function FrameTitle({ text, y, index, sold = false }: { text: string; y: number; index: number; sold?: boolean }) {
   const label = useMemo(() => {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
@@ -108,19 +109,27 @@ function FrameTitle({ text, y, index }: { text: string; y: number; index: number
     const px = 96;
     const font = `italic 500 ${px}px Newsreader, Georgia, serif`;
     context.font = font;
-    canvas.width = Math.ceil(context.measureText(text).width + px * 0.6);
+    const textWidth = context.measureText(text).width;
+    const dot = sold ? px * 0.62 : 0;
+    canvas.width = Math.ceil(textWidth + dot + px * 0.6);
     canvas.height = Math.ceil(px * 1.4);
     context.font = font; // resizing the canvas resets its state
     context.fillStyle = "#2a2723";
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.fillText(text, canvas.width / 2, canvas.height / 2);
+    context.fillText(text, (canvas.width - dot) / 2, canvas.height / 2);
+    if (sold) {
+      context.fillStyle = "#e5484d";
+      context.beginPath();
+      context.arc(canvas.width - px * 0.3 - dot * 0.4, canvas.height / 2, px * 0.2, 0, Math.PI * 2);
+      context.fill();
+    }
     const map = new THREE.CanvasTexture(canvas);
     map.colorSpace = THREE.SRGBColorSpace;
     map.anisotropy = 8;
     const height = TITLE_HEIGHT * 1.4;
     return { map, width: (height * canvas.width) / canvas.height, height };
-  }, [text]);
+  }, [text, sold]);
 
   useEffect(() => () => label?.map.dispose(), [label]);
   if (!label) return null;
@@ -137,7 +146,7 @@ function Artwork({ work, index, texture }: { work: HungWork; index: number; text
   const place = hangWork(work);
   return (
     <group position={[place.x, place.y, place.z]} rotation={[0, place.rotY, 0]} userData={{ workIndex: index }}>
-      <FrameTitle text={work.title} y={work.heightM / 2 + 0.04 + TITLE_HEIGHT * 1.1} index={index} />
+      <FrameTitle text={work.title} y={work.heightM / 2 + 0.04 + TITLE_HEIGHT * 1.1} index={index} sold={work.status === "sold"} />
       <mesh position={[0, 0, 0.025]} userData={{ workIndex: index }}>
         <boxGeometry args={[work.widthM + 0.08, work.heightM + 0.08, 0.05]} />
         <meshStandardMaterial color="#1d1a17" roughness={0.6} />

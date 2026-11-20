@@ -1,22 +1,25 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { roomWorks, rooms, studioHref, workMeta } from "@/lib/content";
+import { redirect } from "next/navigation";
+import { isSold, isStudioOpen, roomWorks, rooms, site, studioHref, workMeta } from "@/lib/content";
 import { InteractiveImage } from "@/components/InteractiveImage";
 
 export const metadata: Metadata = {
   title: "Collection of works",
-  description: "Paintings by Olalekan Isiaka in two rooms: Faith Alive, the Hues That Heal 2.0 exhibition, and The Portfolio.",
+  description: "The works of Hues That Heal: Faith Alive (Hues That Heal 2.0), featured artist Melody Osagie, and Hues That Heal 1.0.",
 };
 
 export default async function WorksPage({ searchParams }: { searchParams: Promise<{ notice?: string }> }) {
+  // The collection is shown from the opening day, with the studio. Until then, the home page announces it.
+  if (!isStudioOpen()) redirect("/#studio");
   const { notice } = await searchParams;
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
       <h1 className="text-4xl sm:text-5xl">Collection of works</h1>
       <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
-        The paintings hang in two rooms. Open one to read it, or walk to it in the visual studio.
+        The works hang in {rooms.length} rooms. Open one to read it, or walk to it in the visual studio.
       </p>
       {notice === "webgl" && (
         <p role="status" className="mt-6 max-w-2xl border border-line bg-paper px-4 py-3">
@@ -50,7 +53,12 @@ export default async function WorksPage({ searchParams }: { searchParams: Promis
                       />
                     </InteractiveImage>
                     <h3 className="mt-3 text-xl group-hover:text-accent">{work.title}</h3>
+                    {work.artist !== site.artist && <p className="mt-1 text-sm">{work.artist}</p>}
                     {meta && <p className="mt-1 text-sm text-muted">{meta}</p>}
+                    <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
+                      <span className={`size-2 rounded-full ${isSold(work) ? "bg-[#e5484d]" : "bg-[#3dd68c]"}`} aria-hidden="true" />
+                      {isSold(work) ? "Original sold, prints available" : "Original available"}
+                    </p>
                   </Link>
                 </li>
               );

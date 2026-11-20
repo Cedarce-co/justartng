@@ -1,6 +1,9 @@
 import { HomeExperience } from "@/components/home/HomeExperience";
-import { mainRoom, site, splitEvents } from "@/lib/content";
+import { isStudioOpen, mainRoom, rooms, site, splitEvents, studioHref, studioOpensAt } from "@/lib/content";
 import { formatWhen, publicText, safeHttpUrl } from "@/lib/format";
+
+// Re-check every few minutes, so the studio buttons unlock on the opening day.
+export const revalidate = 300;
 
 const heroDate = new Intl.DateTimeFormat("en-GB", {
   weekday: "long",
@@ -43,7 +46,14 @@ export default function HomePage() {
         credit: "Olalekan Isiaka  |  with Melody Osagie + Omotosho John",
       }}
       artist={artistDetails()}
-      studio={{ count: mainRoom.works.length, room: mainRoom.name, subtitle: mainRoom.subtitle }}
+      studio={{
+        count: mainRoom.works.length,
+        room: mainRoom.name,
+        subtitle: mainRoom.subtitle,
+        open: isStudioOpen(),
+        opensAt: studioOpensAt(),
+        rooms: rooms.map((room) => ({ id: room.id, name: room.name, subtitle: room.subtitle, href: studioHref(room) })),
+      }}
       event={
         next
           ? {

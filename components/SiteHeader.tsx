@@ -5,13 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-// Leads to the 3D studio section at the end of the home page, where visitors drag to enter.
-const links = [{ href: "/#studio", label: "See 3D Exhibition Studio" }];
 const MotionLink = motion.create(Link);
 
-export function SiteHeader() {
+export function SiteHeader({ studioOpen }: { studioOpen: boolean }) {
   const home = usePathname() === "/";
   const reduced = useReducedMotion();
+  // Leads to the 3D studio section at the end of the home page: the way in once it's open, a preview until then.
+  const links = [{ href: "/#studio", label: studioOpen ? "See 3D Exhibition Studio" : "Anticipate 3D Studio" }];
 
   return (
     <motion.header

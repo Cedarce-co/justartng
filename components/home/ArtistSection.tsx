@@ -44,7 +44,10 @@ function InstagramIcon() {
   );
 }
 
-export function ArtistSection({ artist }: { artist: ArtistDetails }) {
+/** Lekan's earlier collection, Hues That Heal 1.0, in the 3D studio. */
+const COLLECTION_HREF = "/visual-studio?room=hues-1";
+
+export function ArtistSection({ artist, studioOpen }: { artist: ArtistDetails; /** The studio button only shows once it opens. */ studioOpen: boolean }) {
   const reduced = useReducedMotion();
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
@@ -172,9 +175,11 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
           </motion.div>
 
           {/* Desktop: beside the portrait. Phones get it below the portrait instead (end of the section). */}
-          <motion.div variants={slideIn} className="mt-8 hidden max-w-lg lg:block">
-            <DragToEnter href="/visual-studio?room=portfolio" hint="Drag to enter the 3D studio" label="See Lekan’s art collection in 3D" />
-          </motion.div>
+          {studioOpen && (
+            <motion.div variants={slideIn} className="mt-8 hidden max-w-lg lg:block">
+              <DragToEnter href={COLLECTION_HREF} hint="Drag to enter the 3D studio" label="See Lekan’s art collection in 3D" />
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Portrait column */}
@@ -253,15 +258,17 @@ export function ArtistSection({ artist }: { artist: ArtistDetails }) {
       </motion.div>
 
       {/* Phones: the way into his studio comes after his portrait, not over it. */}
-      <motion.div
-        className="relative z-20 mx-auto w-full max-w-lg px-5 pb-16 lg:hidden"
-        initial={reduced ? false : { opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.6 }}
-        transition={{ duration: reduced ? 0 : 0.7, ease }}
-      >
-        <DragToEnter href="/visual-studio?room=portfolio" hint="Drag to enter the 3D studio" label="See Lekan’s art collection in 3D" />
-      </motion.div>
+      {studioOpen && (
+        <motion.div
+          className="relative z-20 mx-auto w-full max-w-lg px-5 pb-16 lg:hidden"
+          initial={reduced ? false : { opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.6 }}
+          transition={{ duration: reduced ? 0 : 0.7, ease }}
+        >
+          <DragToEnter href={COLLECTION_HREF} hint="Drag to enter the 3D studio" label="See Lekan’s art collection in 3D" />
+        </motion.div>
+      )}
     </section>
   );
 }

@@ -114,7 +114,7 @@ export function StudioInvite() {
             </div>
 
             <p className="mt-4 text-[13px] leading-relaxed text-white/80 sm:text-sm">
-              New paintings on love, faith and hope by Olalekan &ldquo;Swanky&rdquo; Isiaka, hung at full size in a studio you can walk through from wherever you are.
+              New paintings on love, faith and hope by Olalekan &ldquo;Swanky&rdquo; Isiaka, with featured artist Melody Osagie and the first collection, Hues That Heal 1.0, hung at full size in a studio you can walk through from wherever you are.
             </p>
 
             <div className="mt-4">

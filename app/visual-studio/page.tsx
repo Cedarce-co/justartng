@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { GalleryLoader } from "@/components/gallery/GalleryLoader";
+import { isStudioOpen } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Visual Studio",
-  description: "Walk the two rooms of the visual studio: Faith Alive, the Hues That Heal 2.0 exhibition, and The Portfolio.",
+  description: "Walk the rooms of the 3D studio: Faith Alive (Hues That Heal 2.0), Melody Osagie, and Hues That Heal 1.0.",
 };
 
+// The studio opens on the day of the exhibition, so check the time on every visit.
+export const dynamic = "force-dynamic";
+
 export default async function VisualStudioPage({ searchParams }: { searchParams: Promise<{ work?: string; room?: string }> }) {
+  // Until then, the home page announces it instead.
+  if (!isStudioOpen()) redirect("/#studio");
+
   const { work, room } = await searchParams;
   return (
     <>

@@ -17,7 +17,7 @@ import { StudioMenu } from "@/components/gallery/StudioMenu";
 import { StudioCompanion } from "@/components/gallery/StudioCompanion";
 import { STUDIO_VISITED_KEY } from "@/components/home/StudioInvite";
 import type { Gender } from "@/components/gallery/Visitor";
-import { getRoom, mainRoom, roomWorks, rooms, roomsFor, splitEvents, studioHref, textureUrl, workMeta, works, type Room } from "@/lib/content";
+import { buyLabel, getRoom, isSold, mainRoom, roomWorks, rooms, roomsFor, site, splitEvents, studioHref, textureUrl, workMeta, works, type Room } from "@/lib/content";
 
 /** The next exhibition's date, e.g. "29 November", for the companion to mention. */
 function upcomingDate() {
@@ -46,7 +46,7 @@ function guideSteps(rooms: Room[]): GuideStep[] {
   if (rooms.length > 1) {
     steps.push({
       title: "Another room",
-      body: `Turn around with the ← → arrow keys (or drag): the door behind you leads to the next room. Tap it and you’ll walk over, open it and step through. ${rooms.map((room) => room.name).join(" and ")} are joined this way.`,
+      body: `Turn around with the ← → arrow keys (or drag): the door behind you leads to the next room. Tap it and you’ll walk over, open it and step through. There are ${rooms.length} rooms: ${rooms.map((room) => room.name).join(", ")}.`,
       anchor: "look",
     });
   }
@@ -63,17 +63,20 @@ function hasWebGL() {
   }
 }
 
-function useGalleryTextures() {
+/** Loads every painting, the starting room's first; the studio opens as soon as that room's are in. */
+function useGalleryTextures(firstRoom: Room) {
   const [textures, setTextures] = useState<Record<string, THREE.Texture>>({});
   const [failed, setFailed] = useState<Record<string, boolean>>({});
   const kept = useRef<THREE.Texture[]>([]);
+  const [first] = useState(() => roomWorks(firstRoom));
 
   useEffect(() => {
     let cancel = false;
     const loader = new THREE.TextureLoader();
     // Phones get the lighter images: they look the same at phone size and use far less graphics memory.
     const quality = window.matchMedia("(max-width: 768px), (pointer: coarse)").matches ? "standard" : "high";
-    works.forEach((work) => {
+    const order = [...first, ...works.filter((work) => !first.some((item) => item.slug === work.slug))];
+    order.forEach((work) => {
       const key = work.slug;
       loader.load(
         textureUrl(work.image, quality),
@@ -96,7 +99,7 @@ function useGalleryTextures() {
     return () => {
       cancel = true;
     };
-  }, []);
+  }, [first]);
 
   useEffect(
     () => () => {
@@ -106,9 +109,26 @@ function useGalleryTextures() {
     [],
   );
 
-  const ready = works.every((work) => textures[work.slug] || failed[work.slug]);
-  const loaded = works.filter((work) => textures[work.slug] || failed[work.slug]).length;
-  return { textures, kept, ready, progress: (loaded / works.length) * 100 };
+  const done = (work: { slug: string }) => Boolean(textures[work.slug] || failed[work.slug]);
+  const ready = first.every(done);
+  const loaded = first.filter(done).length;
+  return { textures, kept, ready, progress: first.length ? (loaded / first.length) * 100 : 100 };
+}
+
+/** The Buy now / Buy prints button: opens the collector form in a new tab. Studio glass, not the site's blue. */
+function BuyButton({ work }: { work: { status?: "available" | "sold" } }) {
+  return (
+    <a
+      href={site.interestForm}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/30 bg-white/10 px-3.5 text-xs font-semibold text-white transition-colors hover:bg-white hover:text-black sm:min-h-10 sm:px-4 sm:text-sm"
+    >
+      {buyLabel(work)}
+      <span aria-hidden="true">&rarr;</span>
+      <span className="sr-only"> (opens a form in a new tab)</span>
+    </a>
+  );
 }
 
 function SoundIcon({ muted }: { muted: boolean }) {
@@ -187,7 +207,8 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
   const hungRef = useRef(hung);
   hungRef.current = hung;
   const steps = useMemo(() => guideSteps(rooms), []);
-  const nextRoom = rooms.find((item) => item.id !== room.id) ?? null;
+  // Each room's door leads on to the next, and the last leads back to the first.
+  const nextRoom = rooms.length > 1 ? rooms[(rooms.findIndex((item) => item.id === room.id) + 1) % rooms.length] : null;
   const nextRoomRef = useRef(nextRoom);
   nextRoomRef.current = nextRoom;
   const [doorOpen, setDoorOpen] = useState(false);
@@ -202,7 +223,7 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
   const [booted, setBooted] = useState(false);
   const [gender, setGender] = useState<Gender | null>(null);
   const [muted, setMuted] = useState(false);
-  const { textures, kept: keptTextures, ready, progress } = useGalleryTextures();
+  const { textures, kept: keptTextures, ready, progress } = useGalleryTextures(room);
   // The companion's state: which paintings have been seen in this room, and the goodbye when leaving.
   const [viewed, setViewed] = useState<string[]>([]);
   const [farewell, setFarewell] = useState<string | null>(null);
@@ -446,6 +467,7 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
         <StudioMenu
           room={room}
           titles={hung.map((item) => item.title)}
+          sold={hung.map((item) => isSold(item))}
           current={current}
           open={menuOpen}
           onToggle={() => setMenuOpen((open) => !open)}
@@ -543,10 +565,18 @@ export default function GalleryApp({ initialSlug, initialRoom }: { initialSlug: 
                 {work.year ? `, ${work.year}` : ""}
               </motion.p>
               {meta && (
-                <motion.p className="mt-0.5 border-b border-white/10 pb-3 text-xs text-white/50 sm:pb-4 sm:text-sm" variants={detailItem}>
+                <motion.p className="mt-0.5 text-xs text-white/50 sm:text-sm" variants={detailItem}>
                   {meta}
                 </motion.p>
               )}
+              {/* Buy the original while it's available; once sold, prints. Both open the same short form. */}
+              <motion.div className="mt-3 flex flex-wrap items-center gap-2 border-b border-white/10 pb-3 sm:pb-4" variants={detailItem}>
+                <BuyButton work={work} />
+                <span className="inline-flex items-center gap-1.5 text-[11px] text-white/60 sm:text-xs">
+                  <span className={`size-2 rounded-full ${isSold(work) ? "bg-[#e5484d]" : "bg-[#3dd68c]"}`} aria-hidden="true" />
+                  {isSold(work) ? "Original sold" : "Original available"}
+                </span>
+              </motion.div>
               <motion.div variants={detailItem}>
                 <WorkWriteup text={work.writeup} className="mt-3 !space-y-2.5 !text-[13px] !leading-snug text-white/85 sm:mt-4 sm:!space-y-4 sm:!text-base sm:!leading-relaxed" />
               </motion.div>

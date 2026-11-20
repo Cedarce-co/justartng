@@ -13,6 +13,7 @@ const ease = [0.22, 1, 0.36, 1] as const;
 export function StudioMenu({
   room,
   titles,
+  sold = [],
   current,
   open,
   onToggle,
@@ -20,6 +21,8 @@ export function StudioMenu({
 }: {
   room: Room;
   titles: string[];
+  /** Per painting, in the same order: true when the original is sold (shown with a red dot). */
+  sold?: boolean[];
   current: number;
   open: boolean;
   onToggle: () => void;
@@ -77,7 +80,15 @@ export function StudioMenu({
                       onClick={() => onPick(index)}
                     >
                       <span className={`w-5 shrink-0 text-[11px] tabular-nums ${here ? "text-white" : "text-white/40"}`}>{String(index + 1).padStart(2, "0")}</span>
-                      <span className="flex-1">{title}</span>
+                      <span className="flex-1">
+                        {title}
+                        {sold[index] && (
+                          <>
+                            <span className="ml-1.5 inline-block size-1.5 -translate-y-px rounded-full bg-[#e5484d] align-middle" aria-hidden="true" />
+                            <span className="sr-only"> (sold)</span>
+                          </>
+                        )}
+                      </span>
                       {here && <span className="size-1.5 rounded-full bg-white" aria-hidden="true" />}
                     </button>
                   </li>

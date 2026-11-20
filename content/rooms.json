@@ -20,23 +20,39 @@
     ]
   },
   {
-    "id": "portfolio",
-    "name": "The Portfolio",
-    "subtitle": "Works 2025–2026",
-    "welcome": "Welcome to The Portfolio, Olalekan “Swanky” Isiaka’s collection of paintings from 2025 and 2026. Take your time with each one.",
+    "id": "melody",
+    "name": "Melody Osagie",
+    "subtitle": "Featured artist",
+    "welcome": "Welcome to the room of Melody Osagie, featured artist at Hues That Heal 2.0. Her drawings in charcoal, graphite, acrylic and Ankara fabric speak of surrender, trust and the reward of faith.",
+    "wallColor": "#f3eee6",
+    "works": [
+      "african-bride-of-christ",
+      "childlike-faith",
+      "renewed-mind",
+      "even-kings-bow",
+      "unbothered",
+      "eye-on-the-cross",
+      "walk-by-faith-not-by-sight",
+      "well-done"
+    ]
+  },
+  {
+    "id": "hues-1",
+    "name": "Hues That Heal 1.0",
+    "subtitle": "The first collection",
+    "welcome": "Welcome to Hues That Heal 1.0, where the journey began. Many of these paintings by Olalekan “Swanky” Isiaka have found homes; prints of those are available, and the rest can still be collected.",
     "wallColor": "#eef1f6",
     "works": [
-      "the-lion-and-the-lamb",
-      "hope",
-      "the-good-fight-of-faith",
-      "the-promise",
-      "open-gates-the-journey",
-      "faith-alive-the-power-of-a-touch",
+      "whatever-he-tells-you",
+      "definition-of-peace",
+      "the-lilies-and-the-sparrows",
       "lost-sheep",
-      "bond",
+      "the-walk",
+      "peace-in-chaos",
+      "the-path",
       "call-for-prayer",
-      "unwavering",
-      "syrophoenician-woman"
+      "the-lion-and-the-lamb-2024",
+      "this-little-light-of-mine"
     ]
   }
 ]

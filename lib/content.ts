@@ -19,6 +19,8 @@ export type Work = {
   imageHeight: number;
   widthM: number;
   heightM: number;
+  /** "sold" when the original has found a home; prints are still offered. Missing means available. */
+  status?: "available" | "sold";
 };
 
 /** A room in the visual studio. `works` lists slugs in hanging order; a painting can hang in more than one room. */
@@ -58,6 +60,10 @@ export type SiteContent = {
   artistWord: string;
   email: string;
   socials: SocialLink[];
+  /** The short form behind every Buy now and Buy prints button. */
+  interestForm: string;
+  /** When the 3D studio opens to visitors (ISO date with offset). */
+  studioOpensAt: string;
 };
 
 export const works = worksJson as Work[];
@@ -123,6 +129,29 @@ export function splitEvents(now = Date.now()) {
   upcoming.sort((a, b) => eventTime(a) - eventTime(b));
   past.sort((a, b) => eventTime(b) - eventTime(a));
   return { upcoming, past };
+}
+
+export function isSold(work: Pick<Work, "status">) {
+  return work.status === "sold";
+}
+
+/** The call to action for a work: the original while it's available, prints once it's sold. */
+export function buyLabel(work: Pick<Work, "status">) {
+  return isSold(work) ? "Buy prints" : "Buy now";
+}
+
+/**
+ * When the 3D studio opens, in milliseconds. STUDIO_OPENS_AT overrides the date in site.json,
+ * e.g. to preview the studio locally before the day: STUDIO_OPENS_AT=2020-01-01.
+ */
+export function studioOpensAt() {
+  const override = typeof process !== "undefined" ? process.env.STUDIO_OPENS_AT : undefined;
+  const time = Date.parse(override || site.studioOpensAt);
+  return Number.isNaN(time) ? 0 : time;
+}
+
+export function isStudioOpen(now = Date.now()) {
+  return now >= studioOpensAt();
 }
 
 export function workMeta(work: Pick<Work, "medium" | "size">) {
